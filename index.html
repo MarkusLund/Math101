@@ -14,6 +14,14 @@
       .font-handwritten {
         font-family: 'Schoolbell', cursive;
       }
+      .material-symbols-rounded {
+        width: 1em;
+        height: 1em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+      }
       @media screen {
         .printable-sheet {
           aspect-ratio: 1 / 1.414; /* A4 aspect ratio */
@@ -30,6 +38,7 @@
           print-color-adjust: exact;
           margin: 0;
           padding: 0;
+          background: white !important;
         }
 
         .printable-sheet {
@@ -45,10 +54,43 @@
         .printable-sheet > div {
             border-radius: 0 !important;
             box-shadow: none !important;
+            background: white !important;
+            padding: 0.5cm !important;
         }
 
         .no-print {
           display: none !important;
+        }
+
+        /* Reduce spacing for print to fit A4 */
+        .printable-sheet .grid-rows-5 {
+          gap: 0.25rem !important;
+        }
+
+        .printable-sheet .mb-8 {
+          margin-bottom: 1rem !important;
+        }
+
+        .printable-sheet .pb-4 {
+          padding-bottom: 0.5rem !important;
+        }
+
+        /* Smaller digit reference in print */
+        .printable-sheet .text-5xl {
+          font-size: 2.5rem !important;
+        }
+
+        .printable-sheet .text-7xl {
+          font-size: 3rem !important;
+        }
+
+        /* Optimize task row sizes for print */
+        .printable-sheet .text-3xl {
+          font-size: 1.5rem !important;
+        }
+
+        .printable-sheet .text-4xl {
+          font-size: 1.75rem !important;
         }
       }
     </style>
