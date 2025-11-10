@@ -1,0 +1,5 @@
+{
+  "name": "Kid's Math Task Generator",
+  "description": "An interactive and printable math worksheet generator for young children. Create simple addition tasks using emojis, customize difficulty, and choose between interactive play or printing A4 sheets.",
+  "requestFramePermissions": []
+}
