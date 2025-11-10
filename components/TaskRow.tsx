@@ -51,7 +51,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, isInteractive, value, fe
             <div className="absolute right-2 top-1/2 -translate-y-1/2">{feedbackIcon()}</div>
           </div>
         ) : (
-          <div className="w-full h-full bg-slate-200/50 dark:bg-slate-700/50 rounded-lg"></div>
+          <div className="w-full h-full bg-slate-200/50 dark:bg-slate-700/50 rounded-lg print:bg-white print:border print:border-slate-300"></div>
         )}
       </div>
     </div>
