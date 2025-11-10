@@ -48,6 +48,8 @@
       @media screen {
         .printable-sheet {
           aspect-ratio: 1 / 1.414; /* A4 aspect ratio */
+          width: 100%;
+          height: auto;
         }
 
         /* Paper-like shadow for print preview */
@@ -58,6 +60,10 @@
             0 4px 8px rgba(0, 0, 0, 0.07),
             0 8px 16px rgba(0, 0, 0, 0.07),
             0 16px 32px rgba(0, 0, 0, 0.07);
+        }
+
+        .print-preview-frame .printable-sheet > div {
+          height: 100%;
         }
       }
       @media print {

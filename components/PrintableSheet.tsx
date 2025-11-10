@@ -28,8 +28,8 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({
   const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
   const sheetContent = (
-    <div className={`bg-white dark:bg-slate-800 h-full rounded-2xl shadow-lg flex flex-col ${
-      interactiveMode ? 'p-4 md:p-6' : 'p-6 md:p-10'
+    <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg flex flex-col ${
+      interactiveMode ? 'p-4 md:p-6' : 'p-6 md:p-10 h-full'
     }`}>
       {showDigits && (
         <div className={`flex justify-between items-center pb-4 border-b-4 border-slate-300 dark:border-slate-600 ${
