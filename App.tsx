@@ -85,7 +85,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen font-sans text-slate-800 dark:text-slate-200">
-      <main className="p-4 md:p-8 flex flex-col xl:flex-row gap-8 items-start justify-center">
+      <main className={`p-4 md:p-8 flex flex-col xl:flex-row gap-8 items-start justify-center ${interactiveMode ? 'pb-48 md:pb-8' : ''}`}>
         <Controls
           language={language}
           setLanguage={setLanguage}
@@ -101,7 +101,7 @@ const App: React.FC = () => {
           onRandomize={randomizeTasks}
           onPrint={handlePrint}
         />
-        <PrintableSheet 
+        <PrintableSheet
           tasks={tasks}
           showDigits={showDigits}
           interactiveMode={interactiveMode}
