@@ -1,5 +1,5 @@
 import React from 'react';
-import { Task } from '../types.ts';
+import { Task } from '../types';
 
 interface TaskRowProps {
   task: Task;

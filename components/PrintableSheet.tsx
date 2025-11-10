@@ -1,6 +1,6 @@
 import React from 'react';
-import { Task } from '../types.ts';
-import { TaskRow } from './TaskRow.tsx';
+import { Task } from '../types';
+import { TaskRow } from './TaskRow';
 
 interface PrintableSheetProps {
   tasks: Task[];

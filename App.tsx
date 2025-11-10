@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Controls } from './components/Controls.tsx';
-import { PrintableSheet } from './components/PrintableSheet.tsx';
-import { NumericKeyboard } from './components/NumericKeyboard.tsx';
-import { generateTasks } from './services/taskGenerator.ts';
-import { Difficulty, Language, Task } from './types.ts';
-import { translations } from './constants.ts';
+import { Controls } from './components/Controls';
+import { PrintableSheet } from './components/PrintableSheet';
+import { NumericKeyboard } from './components/NumericKeyboard';
+import { generateTasks } from './services/taskGenerator';
+import { Difficulty, Language, Task } from './types';
+import { translations } from './constants';
 
 const App: React.FC = () => {
   const [language, setLanguage] = useState<Language>('en');

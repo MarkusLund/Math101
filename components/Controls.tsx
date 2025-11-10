@@ -1,6 +1,6 @@
 import React from 'react';
-import { Difficulty, Language } from '../types.ts';
-import { DIFFICULTY_LEVELS, LANGUAGES } from '../constants.ts';
+import { Difficulty, Language } from '../types';
+import { DIFFICULTY_LEVELS, LANGUAGES } from '../constants';
 
 interface ControlsProps {
   language: Language;

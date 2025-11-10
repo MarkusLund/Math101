@@ -1,5 +1,5 @@
-import { Difficulty, Task } from '../types.ts';
-import { EMOJIS, SYMBOLS } from '../constants.ts';
+import { Difficulty, Task } from '../types';
+import { EMOJIS, SYMBOLS } from '../constants';
 
 const getRandomInt = (max: number) => Math.floor(Math.random() * (max + 1));
 const getRandomElement = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
