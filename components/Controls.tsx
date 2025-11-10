@@ -12,6 +12,8 @@ interface ControlsProps {
   setShowDigits: (show: boolean) => void;
   interactiveMode: boolean;
   onToggleInteractive: () => void;
+  isBlackAndWhite: boolean;
+  setIsBlackAndWhite: (isBw: boolean) => void;
   onRandomize: () => void;
   onPrint: () => void;
 }
@@ -41,6 +43,8 @@ export const Controls: React.FC<ControlsProps> = ({
   setShowDigits,
   interactiveMode,
   onToggleInteractive,
+  isBlackAndWhite,
+  setIsBlackAndWhite,
   onRandomize,
   onPrint,
 }) => {
@@ -86,6 +90,7 @@ export const Controls: React.FC<ControlsProps> = ({
         <div className="space-y-4">
           <ToggleButton checked={showDigits} onChange={() => setShowDigits(!showDigits)} label={t.showDigits} />
           <ToggleButton checked={interactiveMode} onChange={onToggleInteractive} label={t.interactiveMode} />
+          <ToggleButton checked={isBlackAndWhite} onChange={() => setIsBlackAndWhite(!isBlackAndWhite)} label={t.blackAndWhiteMode} />
         </div>
 
         <div className="border-t border-slate-200 dark:border-slate-700 pt-6 space-y-3">

@@ -1,4 +1,3 @@
-
 export type Language = 'en' | 'no';
 
 export enum Difficulty {
@@ -10,6 +9,6 @@ export interface Task {
   id: number;
   operand1: number;
   operand2: number;
-  emoji: string;
+  item: string;
   answer: number;
 }

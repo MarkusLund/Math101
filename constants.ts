@@ -1,6 +1,8 @@
 import { Difficulty } from './types.ts';
 
 export const EMOJIS = ['⚽️', '🚗', '🚜', '🍎', '🍌', '🐶', '🐱', '🚀', '⭐', '❤️', '🍓', '🧸'];
+export const SYMBOLS = ['kid_star', 'toys', 'favorite', 'local_shipping', 'agriculture', 'trophy', 'electric_bolt'];
+
 
 export const translations = {
   en: {
@@ -10,6 +12,7 @@ export const translations = {
     easy: "Easy (Sums to 10)",
     showDigits: "Show Digits 1-9",
     interactiveMode: "Interactive Mode",
+    blackAndWhiteMode: "Black & White Mode",
     randomize: "Randomize",
     print: "Print",
     correct: "Correct!",
@@ -23,6 +26,7 @@ export const translations = {
     easy: "Lett (Summer til 10)",
     showDigits: "Vis Tallene 1-9",
     interactiveMode: "Interaktiv Modus",
+    blackAndWhiteMode: "Svart-hvitt Modus",
     randomize: "Nye Oppgaver",
     print: "Skriv ut",
     correct: "Riktig!",

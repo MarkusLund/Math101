@@ -11,6 +11,7 @@ const App: React.FC = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.VERY_EASY);
   const [showDigits, setShowDigits] = useState<boolean>(true);
   const [interactiveMode, setInteractiveMode] = useState<boolean>(false);
+  const [isBlackAndWhite, setIsBlackAndWhite] = useState<boolean>(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [feedback, setFeedback] = useState<Record<number, boolean | null>>({});
@@ -19,12 +20,12 @@ const App: React.FC = () => {
   const t = translations[language];
 
   const randomizeTasks = useCallback(() => {
-    const newTasks = generateTasks(difficulty, 5);
+    const newTasks = generateTasks(difficulty, 5, isBlackAndWhite);
     setTasks(newTasks);
     setAnswers({});
     setFeedback({});
     setActiveTaskIndex(null);
-  }, [difficulty]);
+  }, [difficulty, isBlackAndWhite]);
 
   useEffect(() => {
     const browserLang = navigator.language.split('-')[0];
@@ -39,7 +40,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     randomizeTasks();
-  }, [difficulty, randomizeTasks]);
+  }, [difficulty, isBlackAndWhite, randomizeTasks]);
 
   const handleAnswerChange = (taskId: number, value: string) => {
     const newAnswers = { ...answers, [taskId]: value };
@@ -95,6 +96,8 @@ const App: React.FC = () => {
           setShowDigits={setShowDigits}
           interactiveMode={interactiveMode}
           onToggleInteractive={handleToggleInteractive}
+          isBlackAndWhite={isBlackAndWhite}
+          setIsBlackAndWhite={setIsBlackAndWhite}
           onRandomize={randomizeTasks}
           onPrint={handlePrint}
         />
@@ -107,6 +110,7 @@ const App: React.FC = () => {
           onAnswerFocus={setActiveTaskIndex}
           activeTaskIndex={activeTaskIndex}
           t={t}
+          isBlackAndWhite={isBlackAndWhite}
         />
       </main>
       {interactiveMode && (

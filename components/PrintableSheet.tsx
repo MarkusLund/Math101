@@ -11,6 +11,7 @@ interface PrintableSheetProps {
   onAnswerFocus: (taskId: number) => void;
   activeTaskIndex: number | null;
   t: any;
+  isBlackAndWhite: boolean;
 }
 
 export const PrintableSheet: React.FC<PrintableSheetProps> = ({
@@ -21,7 +22,8 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({
   feedback,
   onAnswerFocus,
   activeTaskIndex,
-  t
+  t,
+  isBlackAndWhite,
 }) => {
   const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -48,6 +50,7 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({
                 onFocus={() => onAnswerFocus(task.id)}
                 isActive={activeTaskIndex === task.id}
                 t={t}
+                isBlackAndWhite={isBlackAndWhite}
               />
             ))}
           </div>
