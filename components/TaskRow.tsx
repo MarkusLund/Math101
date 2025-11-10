@@ -36,11 +36,11 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, isInteractive, value, fe
   };
   
   return (
-    <div className="grid grid-cols-5 items-center border-b border-slate-200 dark:border-slate-700 last:border-b-0">
+    <div className="grid grid-cols-[2fr_auto_2fr_auto_1fr] items-center border-b border-slate-200 dark:border-slate-700 last:border-b-0">
       <div className="p-2 h-full"><ItemDisplay item={task.item} count={task.operand1} isBlackAndWhite={isBlackAndWhite} /></div>
-      <div className="flex justify-center items-center text-3xl md:text-4xl font-bold text-slate-500 dark:text-slate-400">+</div>
+      <div className="flex justify-center items-center text-3xl md:text-4xl font-bold text-slate-500 dark:text-slate-400 px-2">+</div>
       <div className="p-2 h-full"><ItemDisplay item={task.item} count={task.operand2} isBlackAndWhite={isBlackAndWhite} /></div>
-      <div className="flex justify-center items-center text-3xl md:text-4xl font-bold text-slate-500 dark:text-slate-400">=</div>
+      <div className="flex justify-center items-center text-3xl md:text-4xl font-bold text-slate-500 dark:text-slate-400 px-2">=</div>
       <div className="p-2 h-full relative">
         {isInteractive ? (
           <div 
