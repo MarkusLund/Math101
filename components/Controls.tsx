@@ -25,13 +25,13 @@ const ToggleButton: React.FC<{
   onChange: () => void;
   label: string;
 }> = ({ checked, onChange, label }) => (
-  <label className="flex items-center cursor-pointer">
+  <label className="flex items-center cursor-pointer group">
     <div className="relative">
       <input type="checkbox" className="sr-only" checked={checked} onChange={onChange} />
-      <div className={`block w-14 h-8 rounded-full transition ${checked ? 'bg-indigo-600' : 'bg-gray-600'}`}></div>
-      <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${checked ? 'translate-x-6' : ''}`}></div>
+      <div className={`block w-14 h-8 rounded-full transition-colors duration-300 ease-in-out ${checked ? 'bg-primary-500' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
+      <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 ease-in-out shadow-sm ${checked ? 'translate-x-6' : ''}`}></div>
     </div>
-    <div className="ml-3 text-gray-700 dark:text-gray-300 font-medium">{label}</div>
+    <div className="ml-3 text-slate-700 dark:text-slate-300 font-medium group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{label}</div>
   </label>
 );
 
@@ -53,19 +53,23 @@ export const Controls: React.FC<ControlsProps> = ({
   onPrint,
 }) => {
   return (
-    <div className="w-full xl:w-80 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg no-print flex-shrink-0">
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">{t.title}</h1>
+    <div className="w-full xl:w-96 bg-white dark:bg-slate-800 p-6 md:p-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none no-print flex-shrink-0 border border-slate-100 dark:border-slate-700">
+      <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-8 font-display tracking-tight text-center xl:text-left">
+        <span className="text-primary-500">Math</span> 101
+      </h1>
 
-      <div className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t.language}</label>
-          <div className="flex bg-slate-200 dark:bg-slate-700 rounded-lg p-1">
+      <div className="space-y-8">
+        <div className="space-y-3">
+          <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t.language}</label>
+          <div className="flex bg-slate-100 dark:bg-slate-900/50 rounded-xl p-1.5 gap-1">
             {LANGUAGES.map(lang => (
               <button
                 key={lang.id}
                 onClick={() => setLanguage(lang.id as Language)}
-                className={`w-full py-2 text-sm font-semibold rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-slate-200 dark:focus-visible:ring-offset-slate-700 ${
-                  language === lang.id ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow' : 'text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-800/50'
+                className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                  language === lang.id 
+                    ? 'bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5' 
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
               >
                 {lang.name}
@@ -74,15 +78,17 @@ export const Controls: React.FC<ControlsProps> = ({
           </div>
         </div>
       
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t.difficulty}</label>
+        <div className="space-y-3">
+          <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t.difficulty}</label>
           <div className="flex flex-col space-y-2">
             {DIFFICULTY_LEVELS.map(level => (
               <button
                 key={level.id}
                 onClick={() => setDifficulty(level.id)}
-                className={`w-full text-left p-3 text-sm font-semibold rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-800 ${
-                  difficulty === level.id ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-indigo-200 dark:hover:bg-slate-600'
+                className={`w-full text-left px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                  difficulty === level.id 
+                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30 transform scale-[1.02]' 
+                    : 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:pl-5'
                 }`}
               >
                 {t[level.langKey]}
@@ -91,15 +97,17 @@ export const Controls: React.FC<ControlsProps> = ({
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t.displayMode}</label>
+        <div className="space-y-3">
+          <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t.displayMode}</label>
           <div className="flex flex-col space-y-2">
             {DISPLAY_MODES.map(mode => (
               <button
                 key={mode.id}
                 onClick={() => setDisplayMode(mode.id)}
-                className={`w-full text-left p-3 text-sm font-semibold rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-800 ${
-                  displayMode === mode.id ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-indigo-200 dark:hover:bg-slate-600'
+                className={`w-full text-left px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                  displayMode === mode.id 
+                    ? 'bg-accent-500 text-white shadow-lg shadow-accent-500/30 transform scale-[1.02]' 
+                    : 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:pl-5'
                 }`}
               >
                 {t[mode.langKey]}
@@ -108,19 +116,19 @@ export const Controls: React.FC<ControlsProps> = ({
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 pt-2">
           <ToggleButton checked={showDigits} onChange={() => setShowDigits(!showDigits)} label={t.showDigits} />
           <ToggleButton checked={interactiveMode} onChange={onToggleInteractive} label={t.interactiveMode} />
           <ToggleButton checked={isBlackAndWhite} onChange={() => setIsBlackAndWhite(!isBlackAndWhite)} label={t.blackAndWhiteMode} />
         </div>
 
-        <div className="border-t border-slate-200 dark:border-slate-700 pt-6 space-y-3">
-          <button onClick={onRandomize} className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-800">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V4a1 1 0 011-1zm10.899 9.899a7.002 7.002 0 01-11.601-2.566 1 1 0 011.885-.666A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101z" clipRule="evenodd" /></svg>
+        <div className="border-t border-slate-100 dark:border-slate-700 pt-8 space-y-4">
+          <button onClick={onRandomize} className="w-full flex items-center justify-center gap-2 bg-primary-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-primary-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shadow-lg shadow-primary-600/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary-500 dark:focus-visible:ring-offset-slate-800">
+            <span className="material-symbols-rounded">refresh</span>
             {t.randomize}
           </button>
-          <button onClick={onPrint} className="w-full flex items-center justify-center gap-2 bg-slate-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-500 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-800">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v3a2 2 0 002 2h6a2 2 0 002-2v-3h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v3h6v-3zm2-4h-1v-1a1 1 0 00-1-1H7a1 1 0 00-1 1v1H5V9h10v3z" clipRule="evenodd" /></svg>
+          <button onClick={onPrint} className="w-full flex items-center justify-center gap-2 bg-slate-800 dark:bg-slate-700 text-white font-bold py-4 px-6 rounded-xl hover:bg-slate-900 dark:hover:bg-slate-600 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shadow-lg shadow-slate-800/20 dark:shadow-slate-700/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-500 dark:focus-visible:ring-offset-slate-800">
+            <span className="material-symbols-rounded">print</span>
             {t.print}
           </button>
         </div>

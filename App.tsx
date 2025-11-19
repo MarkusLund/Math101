@@ -1,15 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Controls } from './components/Controls';
-import { PrintableSheet } from './components/PrintableSheet';
-import { NumericKeyboard } from './components/NumericKeyboard';
-import { generateTasks } from './services/taskGenerator';
-import { Difficulty, DisplayMode, Language, Task } from './types';
-import { translations } from './constants';
+import React, { useState, useEffect, useCallback } from "react";
+import { Controls } from "./components/Controls";
+import { PrintableSheet } from "./components/PrintableSheet";
+import { NumericKeyboard } from "./components/NumericKeyboard";
+import { generateTasks } from "./services/taskGenerator";
+import { Difficulty, DisplayMode, Language, Task } from "./types";
+import { translations } from "./constants";
 
 const App: React.FC = () => {
-  const [language, setLanguage] = useState<Language>('en');
-  const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.VERY_EASY);
-  const [displayMode, setDisplayMode] = useState<DisplayMode>(DisplayMode.SYMBOLS_ONLY);
+  const [language, setLanguage] = useState<Language>("en");
+  const [difficulty, setDifficulty] = useState<Difficulty>(
+    Difficulty.VERY_EASY
+  );
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(
+    DisplayMode.SYMBOLS_ONLY
+  );
   const [showDigits, setShowDigits] = useState<boolean>(true);
   const [interactiveMode, setInteractiveMode] = useState<boolean>(false);
   const [isBlackAndWhite, setIsBlackAndWhite] = useState<boolean>(false);
@@ -17,7 +21,7 @@ const App: React.FC = () => {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [feedback, setFeedback] = useState<Record<number, boolean | null>>({});
   const [activeTaskIndex, setActiveTaskIndex] = useState<number | null>(null);
-  
+
   const t = translations[language];
 
   const randomizeTasks = useCallback(() => {
@@ -29,11 +33,11 @@ const App: React.FC = () => {
   }, [difficulty, isBlackAndWhite]);
 
   useEffect(() => {
-    const browserLang = navigator.language.split('-')[0];
-    if (browserLang === 'no') {
-      setLanguage('no');
+    const browserLang = navigator.language.split("-")[0];
+    if (browserLang === "no") {
+      setLanguage("no");
     } else {
-      setLanguage('en');
+      setLanguage("en");
     }
     randomizeTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -47,46 +51,49 @@ const App: React.FC = () => {
     const newAnswers = { ...answers, [taskId]: value };
     setAnswers(newAnswers);
 
-    const task = tasks.find(t => t.id === taskId);
+    const task = tasks.find((t) => t.id === taskId);
     if (task && value === task.answer.toString()) {
-      setFeedback(prev => ({...prev, [taskId]: true}));
+      setFeedback((prev) => ({ ...prev, [taskId]: true }));
     } else if (task && value.length >= task.answer.toString().length) {
-      setFeedback(prev => ({...prev, [taskId]: false}));
+      setFeedback((prev) => ({ ...prev, [taskId]: false }));
     } else {
-      setFeedback(prev => ({...prev, [taskId]: null}));
+      setFeedback((prev) => ({ ...prev, [taskId]: null }));
     }
   };
-  
+
   const handlePrint = () => {
     window.print();
   };
 
   const handleToggleInteractive = () => {
-    setInteractiveMode(prev => !prev);
+    setInteractiveMode((prev) => !prev);
     setAnswers({});
     setFeedback({});
     setActiveTaskIndex(null);
   };
-  
+
   const handleKeyboardInput = (key: string) => {
     if (activeTaskIndex === null) return;
 
-    const currentAnswer = answers[activeTaskIndex] || '';
-    let newAnswer = '';
+    const currentAnswer = answers[activeTaskIndex] || "";
+    let newAnswer = "";
 
-    if (key === '⌫') {
+    if (key === "⌫") {
       newAnswer = currentAnswer.slice(0, -1);
     } else {
       newAnswer = currentAnswer + key;
     }
-    
+
     handleAnswerChange(activeTaskIndex, newAnswer);
   };
 
-
   return (
-    <div className="min-h-screen font-sans text-slate-800 dark:text-slate-200">
-      <main className={`p-4 md:p-8 flex flex-col xl:flex-row gap-8 items-start justify-center ${interactiveMode ? 'pb-48 md:pb-8' : ''}`}>
+    <div className="min-h-screen font-sans bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
+      <main
+        className={`p-4 md:p-8 flex flex-col xl:flex-row gap-8 items-start justify-center ${
+          interactiveMode ? "pb-48 md:pb-8" : ""
+        }`}
+      >
         <Controls
           language={language}
           setLanguage={setLanguage}
@@ -117,9 +124,7 @@ const App: React.FC = () => {
           isBlackAndWhite={isBlackAndWhite}
         />
       </main>
-      {interactiveMode && (
-         <NumericKeyboard onKeyPress={handleKeyboardInput} />
-      )}
+      {interactiveMode && <NumericKeyboard onKeyPress={handleKeyboardInput} />}
     </div>
   );
 };

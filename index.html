@@ -6,70 +6,132 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kid's Math Task Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Schoolbell&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,1,-50..200" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Nunito:wght@400..800&family=Schoolbell&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,1,-50..200"
+    />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Nunito", "sans-serif"],
+              display: ["Fredoka", "sans-serif"],
+              handwritten: ["Schoolbell", "cursive"],
+            },
+            colors: {
+              primary: {
+                50: "#f0f9ff",
+                100: "#e0f2fe",
+                200: "#bae6fd",
+                300: "#7dd3fc",
+                400: "#38bdf8",
+                500: "#0ea5e9",
+                600: "#0284c7",
+                700: "#0369a1",
+                800: "#075985",
+                900: "#0c4a6e",
+              },
+              accent: {
+                50: "#fff1f2",
+                100: "#ffe4e6",
+                200: "#fecdd3",
+                300: "#fda4af",
+                400: "#fb7185",
+                500: "#f43f5e",
+                600: "#e11d48",
+                700: "#be123c",
+                800: "#9f1239",
+                900: "#881337",
+              },
+            },
+          },
+        },
+      };
+    </script>
     <style>
-      .font-handwritten {
-        font-family: 'Schoolbell', cursive;
+      :root {
+        --a4-width: 210mm;
+        --a4-height: 297mm;
+        --print-margin: 1.5cm;
       }
+
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: "Fredoka", sans-serif;
+      }
+
+      .font-handwritten {
+        font-family: "Schoolbell", cursive;
+      }
+
       .material-symbols-rounded {
         width: 1em;
         height: 1em;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 48;
       }
 
       /* Print preview frame styling */
       .print-preview-frame {
-        max-width: 800px;
-        width: 100%;
+        width: var(--a4-width);
+        height: var(--a4-height);
         margin: 0 auto;
-        padding: 2rem;
-        background: linear-gradient(145deg, #e6e9ef 0%, #f5f7fa 100%);
-        border-radius: 1.5rem;
-        box-shadow:
-          0 10px 40px rgba(0, 0, 0, 0.1),
-          0 2px 8px rgba(0, 0, 0, 0.06),
-          inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        background: white;
+        position: relative;
+        overflow: hidden;
       }
 
       .dark .print-preview-frame {
-        background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
-        box-shadow:
-          0 10px 40px rgba(0, 0, 0, 0.3),
-          0 2px 8px rgba(0, 0, 0, 0.2),
-          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        background: white; /* Always white for print preview */
       }
 
       @media screen {
-        .printable-sheet {
-          aspect-ratio: 1 / 1.414; /* A4 aspect ratio */
-          width: 100%;
-          height: auto;
+        .print-preview-wrapper {
+          padding: 2rem;
+          background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+          border-radius: 1.5rem;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+            0 10px 10px -5px rgba(0, 0, 0, 0.04);
+          display: flex;
+          justify-content: center;
+          overflow: auto;
         }
 
-        /* Paper-like shadow for print preview */
-        .print-preview-frame .printable-sheet {
-          box-shadow:
-            0 1px 2px rgba(0, 0, 0, 0.07),
-            0 2px 4px rgba(0, 0, 0, 0.07),
-            0 4px 8px rgba(0, 0, 0, 0.07),
-            0 8px 16px rgba(0, 0, 0, 0.07),
-            0 16px 32px rgba(0, 0, 0, 0.07);
+        .dark .print-preview-wrapper {
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         }
 
-        .print-preview-frame .printable-sheet > div {
-          height: 100%;
+        .print-preview-frame {
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
+            0 1px 2px rgba(0, 0, 0, 0.24);
+          transform-origin: top center;
+          /* Scale down if needed on small screens, handled by JS or container query ideally, 
+             but for now we rely on scrolling or simple max-width */
         }
       }
+
       @media print {
         @page {
           size: A4;
-          margin: 1.5cm;
+          margin: 0; /* We handle margins inside the content */
         }
 
         body {
@@ -80,76 +142,37 @@
           background: white !important;
         }
 
-        .print-preview-frame {
-          padding: 0 !important;
-          background: none !important;
-          box-shadow: none !important;
-          border-radius: 0 !important;
-        }
-
-        .printable-sheet {
-          box-shadow: none !important;
-          border: none !important;
-          width: 100%;
-          height: 100%;
-          margin: 0;
-          border-radius: 0;
-          page-break-inside: avoid;
-        }
-
-        .printable-sheet > div {
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            background: white !important;
-            padding: 0.5cm !important;
-        }
-
         .no-print {
           display: none !important;
         }
 
-        /* Reduce spacing for print to fit A4 */
-        .printable-sheet .grid-rows-5 {
-          gap: 0.25rem !important;
+        .print-preview-wrapper {
+          padding: 0 !important;
+          background: none !important;
+          box-shadow: none !important;
+          border-radius: 0 !important;
+          display: block !important;
         }
 
-        .printable-sheet .mb-8 {
-          margin-bottom: 1rem !important;
-        }
-
-        .printable-sheet .pb-4 {
-          padding-bottom: 0.5rem !important;
-        }
-
-        /* Smaller digit reference in print */
-        .printable-sheet .text-5xl {
-          font-size: 2.5rem !important;
-        }
-
-        .printable-sheet .text-7xl {
-          font-size: 3rem !important;
-        }
-
-        /* Optimize task row sizes for print */
-        .printable-sheet .text-3xl {
-          font-size: 1.5rem !important;
-        }
-
-        .printable-sheet .text-4xl {
-          font-size: 1.75rem !important;
+        .print-preview-frame {
+          width: 100% !important;
+          height: 100% !important;
+          box-shadow: none !important;
+          margin: 0 !important;
+          page-break-after: always;
         }
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0"
-  }
-}
-</script>
-</head>
+    <script type="importmap">
+      {
+        "imports": {
+          "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+          "react/": "https://aistudiocdn.com/react@^19.2.0/",
+          "react": "https://aistudiocdn.com/react@^19.2.0"
+        }
+      }
+    </script>
+  </head>
   <body class="bg-slate-100 dark:bg-slate-900">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>

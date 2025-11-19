@@ -31,14 +31,14 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({
 
   const sheetContent = (
     <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg flex flex-col ${
-      interactiveMode ? 'p-4 md:p-6' : 'p-6 md:p-10 h-full'
+      interactiveMode ? 'p-4 md:p-6' : 'p-8 md:p-12 h-full'
     }`}>
       {showDigits && (
-        <div className={`flex justify-between items-center pb-4 border-b-4 border-slate-300 dark:border-slate-600 ${
+        <div className={`flex justify-between items-center pb-4 border-b-4 border-slate-100 dark:border-slate-700 ${
           interactiveMode ? 'mb-4' : 'mb-8'
         }`}>
           {digits.map(digit => (
-            <span key={digit} className={`font-handwritten text-slate-700 dark:text-slate-300 ${
+            <span key={digit} className={`font-handwritten text-slate-400 dark:text-slate-500 ${
               interactiveMode ? 'text-4xl md:text-5xl' : 'text-5xl md:text-7xl'
             }`}>
               {digit}
@@ -46,7 +46,7 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({
           ))}
         </div>
       )}
-      <div className={`flex-grow grid grid-rows-5 ${interactiveMode ? 'gap-3 md:gap-4' : 'gap-2'}`}>
+      <div className={`flex-grow grid grid-rows-5 ${interactiveMode ? 'gap-3 md:gap-4' : 'gap-4'}`}>
         {tasks.map(task => (
           <TaskRow
             key={task.id}
@@ -76,9 +76,9 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({
 
   // Non-interactive mode: print preview frame
   return (
-    <div className="w-full flex justify-center items-center">
+    <div className="w-full flex justify-center items-start print-preview-wrapper">
       <div className="print-preview-frame">
-        <div className="printable-sheet">
+        <div className="printable-sheet h-full">
           {sheetContent}
         </div>
       </div>
