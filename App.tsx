@@ -7,7 +7,7 @@ import { Difficulty, DisplayMode, Language, Task } from "./types";
 import { translations } from "./constants";
 
 const App: React.FC = () => {
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>("no");
   const [difficulty, setDifficulty] = useState<Difficulty>(
     Difficulty.VERY_EASY
   );
@@ -34,10 +34,10 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const browserLang = navigator.language.split("-")[0];
-    if (browserLang === "no") {
-      setLanguage("no");
-    } else {
+    if (browserLang === "en") {
       setLanguage("en");
+    } else {
+      setLanguage("no");
     }
     randomizeTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
