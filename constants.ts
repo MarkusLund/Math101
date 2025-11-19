@@ -1,4 +1,4 @@
-import { Difficulty, DisplayMode } from './types';
+import { DisplayMode } from './types';
 
 export const EMOJIS = ['⚽️', '🚗', '🚜', '🍎', '🍌', '🐶', '🐱', '🚀', '⭐', '❤️', '🍓', '🧸'];
 export const SYMBOLS = ['kid_star', 'toys', 'favorite', 'local_shipping', 'agriculture', 'trophy', 'electric_bolt'];
@@ -45,11 +45,7 @@ export const translations = {
   },
 };
 
-export const DIFFICULTY_LEVELS = [
-  { id: Difficulty.VERY_EASY, langKey: 'veryEasy' },
-  { id: Difficulty.EASY, langKey: 'easy' },
-  { id: Difficulty.MEDIUM, langKey: 'medium' },
-];
+export const DIFFICULTY_STEPS = [5, 10, 11, 12, 13, 14, 15, 20, 30, 50, 100, 200, 500, 1000];
 
 export const DISPLAY_MODES = [
   { id: DisplayMode.SYMBOLS_ONLY, langKey: 'symbolsOnly' },

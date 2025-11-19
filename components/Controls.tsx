@@ -1,13 +1,13 @@
 import React from 'react';
-import { Difficulty, DisplayMode, Language } from '../types';
-import { DIFFICULTY_LEVELS, DISPLAY_MODES, LANGUAGES } from '../constants';
+import { DisplayMode, Language } from '../types';
+import { DIFFICULTY_STEPS, DISPLAY_MODES, LANGUAGES } from '../constants';
 
 interface ControlsProps {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: any;
-  difficulty: Difficulty;
-  setDifficulty: (level: Difficulty) => void;
+  maxSum: number;
+  setMaxSum: (sum: number) => void;
   displayMode: DisplayMode;
   setDisplayMode: (mode: DisplayMode) => void;
   showDigits: boolean;
@@ -39,8 +39,8 @@ export const Controls: React.FC<ControlsProps> = ({
   language,
   setLanguage,
   t,
-  difficulty,
-  setDifficulty,
+  maxSum,
+  setMaxSum,
   displayMode,
   setDisplayMode,
   showDigits,
@@ -79,40 +79,48 @@ export const Controls: React.FC<ControlsProps> = ({
         </div>
       
         <div className="space-y-3">
-          <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t.difficulty}</label>
-          <div className="flex flex-col space-y-2">
-            {DIFFICULTY_LEVELS.map(level => (
-              <button
-                key={level.id}
-                onClick={() => setDifficulty(level.id)}
-                className={`w-full text-left px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-                  difficulty === level.id 
-                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30 transform scale-[1.02]' 
-                    : 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:pl-5'
-                }`}
-              >
-                {t[level.langKey]}
-              </button>
-            ))}
+          <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+            {t.difficulty}: <span className="text-primary-600 dark:text-primary-400 text-lg">{maxSum}</span>
+          </label>
+          <div className="px-2">
+            <input
+              type="range"
+              min="0"
+              max={DIFFICULTY_STEPS.length - 1}
+              value={DIFFICULTY_STEPS.indexOf(maxSum)}
+              onChange={(e) => setMaxSum(DIFFICULTY_STEPS[parseInt(e.target.value)])}
+              className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
+            />
+            <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium">
+              <span>{DIFFICULTY_STEPS[0]}</span>
+              <span>{DIFFICULTY_STEPS[DIFFICULTY_STEPS.length - 1]}</span>
+            </div>
           </div>
         </div>
 
         <div className="space-y-3">
           <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t.displayMode}</label>
           <div className="flex flex-col space-y-2">
-            {DISPLAY_MODES.map(mode => (
-              <button
-                key={mode.id}
-                onClick={() => setDisplayMode(mode.id)}
-                className={`w-full text-left px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-                  displayMode === mode.id 
-                    ? 'bg-accent-500 text-white shadow-lg shadow-accent-500/30 transform scale-[1.02]' 
-                    : 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:pl-5'
-                }`}
-              >
-                {t[mode.langKey]}
-              </button>
-            ))}
+            {DISPLAY_MODES.map(mode => {
+              const isDisabled = maxSum > 15 && mode.id !== DisplayMode.NUMBERS_ONLY;
+              return (
+                <button
+                  key={mode.id}
+                  onClick={() => !isDisabled && setDisplayMode(mode.id)}
+                  disabled={isDisabled}
+                  className={`w-full text-left px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                    displayMode === mode.id 
+                      ? 'bg-accent-500 text-white shadow-lg shadow-accent-500/30 transform scale-[1.02]' 
+                      : isDisabled
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50'
+                        : 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:pl-5'
+                  }`}
+                >
+                  {t[mode.langKey]}
+                  {isDisabled && <span className="ml-2 text-xs opacity-70">(Max 15)</span>}
+                </button>
+              );
+            })}
           </div>
         </div>
 

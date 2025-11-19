@@ -1,12 +1,11 @@
-import { Difficulty, Task } from '../types';
+import { Task } from '../types';
 import { EMOJIS, SYMBOLS } from '../constants';
 
 const getRandomInt = (max: number) => Math.floor(Math.random() * (max + 1));
 const getRandomElement = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
-export const generateTasks = (difficulty: Difficulty, count: number, isBlackAndWhite: boolean): Task[] => {
+export const generateTasks = (maxSum: number, count: number, isBlackAndWhite: boolean): Task[] => {
   const tasks: Task[] = [];
-  const maxSum = difficulty === Difficulty.VERY_EASY ? 5 : difficulty === Difficulty.EASY ? 10 : 20;
   const usedProblems = new Set<string>();
 
   // Select unique items (emojis or symbols) for each task

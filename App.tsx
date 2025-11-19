@@ -3,20 +3,34 @@ import { Controls } from "./components/Controls";
 import { PrintableSheet } from "./components/PrintableSheet";
 import { NumericKeyboard } from "./components/NumericKeyboard";
 import { generateTasks } from "./services/taskGenerator";
-import { Difficulty, DisplayMode, Language, Task } from "./types";
+import { DisplayMode, Language, Task } from "./types";
 import { translations } from "./constants";
 
 const App: React.FC = () => {
-  const [language, setLanguage] = useState<Language>("no");
-  const [difficulty, setDifficulty] = useState<Difficulty>(
-    Difficulty.VERY_EASY
-  );
-  const [displayMode, setDisplayMode] = useState<DisplayMode>(
-    DisplayMode.SYMBOLS_ONLY
-  );
-  const [showDigits, setShowDigits] = useState<boolean>(true);
-  const [interactiveMode, setInteractiveMode] = useState<boolean>(false);
-  const [isBlackAndWhite, setIsBlackAndWhite] = useState<boolean>(false);
+  const [language, setLanguage] = useState<Language>(() => {
+    const saved = localStorage.getItem("language");
+    return (saved as Language) || "no";
+  });
+  const [maxSum, setMaxSum] = useState<number>(() => {
+    const saved = localStorage.getItem("maxSum");
+    return saved ? parseInt(saved, 10) : 5;
+  });
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(() => {
+    const saved = localStorage.getItem("displayMode");
+    return (saved as DisplayMode) || DisplayMode.SYMBOLS_ONLY;
+  });
+  const [showDigits, setShowDigits] = useState<boolean>(() => {
+    const saved = localStorage.getItem("showDigits");
+    return saved ? JSON.parse(saved) : true;
+  });
+  const [interactiveMode, setInteractiveMode] = useState<boolean>(() => {
+    const saved = localStorage.getItem("interactiveMode");
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [isBlackAndWhite, setIsBlackAndWhite] = useState<boolean>(() => {
+    const saved = localStorage.getItem("isBlackAndWhite");
+    return saved ? JSON.parse(saved) : false;
+  });
   const [tasks, setTasks] = useState<Task[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [feedback, setFeedback] = useState<Record<number, boolean | null>>({});
@@ -24,13 +38,30 @@ const App: React.FC = () => {
 
   const t = translations[language];
 
+  // Persistence
+  useEffect(() => {
+    localStorage.setItem("language", language);
+    localStorage.setItem("maxSum", maxSum.toString());
+    localStorage.setItem("displayMode", displayMode);
+    localStorage.setItem("showDigits", JSON.stringify(showDigits));
+    localStorage.setItem("interactiveMode", JSON.stringify(interactiveMode));
+    localStorage.setItem("isBlackAndWhite", JSON.stringify(isBlackAndWhite));
+  }, [language, maxSum, displayMode, showDigits, interactiveMode, isBlackAndWhite]);
+
+  // Restrictions
+  useEffect(() => {
+    if (maxSum > 15 && displayMode !== DisplayMode.NUMBERS_ONLY) {
+      setDisplayMode(DisplayMode.NUMBERS_ONLY);
+    }
+  }, [maxSum, displayMode]);
+
   const randomizeTasks = useCallback(() => {
-    const newTasks = generateTasks(difficulty, 5, isBlackAndWhite);
+    const newTasks = generateTasks(maxSum, 5, isBlackAndWhite);
     setTasks(newTasks);
     setAnswers({});
     setFeedback({});
     setActiveTaskIndex(null);
-  }, [difficulty, isBlackAndWhite]);
+  }, [maxSum, isBlackAndWhite]);
 
   useEffect(() => {
     randomizeTasks();
@@ -39,7 +70,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     randomizeTasks();
-  }, [difficulty, isBlackAndWhite, randomizeTasks]);
+  }, [maxSum, isBlackAndWhite, randomizeTasks]);
 
   const handleAnswerChange = (taskId: number, value: string) => {
     const newAnswers = { ...answers, [taskId]: value };
@@ -92,8 +123,8 @@ const App: React.FC = () => {
           language={language}
           setLanguage={setLanguage}
           t={t}
-          difficulty={difficulty}
-          setDifficulty={setDifficulty}
+          maxSum={maxSum}
+          setMaxSum={setMaxSum}
           displayMode={displayMode}
           setDisplayMode={setDisplayMode}
           showDigits={showDigits}
