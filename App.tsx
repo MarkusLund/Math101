@@ -48,6 +48,20 @@ const App: React.FC = () => {
     localStorage.setItem("isBlackAndWhite", JSON.stringify(isBlackAndWhite));
   }, [language, maxSum, displayMode, showDigits, interactiveMode, isBlackAndWhite]);
 
+  // SEO Updates
+  useEffect(() => {
+    document.title = t.seoTitle;
+    document.documentElement.lang = language;
+    
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', t.seoDescription);
+  }, [language, t]);
+
   // Restrictions
   useEffect(() => {
     if (maxSum > 15 && displayMode !== DisplayMode.NUMBERS_ONLY) {
