@@ -33,12 +33,6 @@ const App: React.FC = () => {
   }, [difficulty, isBlackAndWhite]);
 
   useEffect(() => {
-    const browserLang = navigator.language.split("-")[0];
-    if (browserLang === "en") {
-      setLanguage("en");
-    } else {
-      setLanguage("no");
-    }
     randomizeTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
