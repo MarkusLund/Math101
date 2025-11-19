@@ -3,12 +3,13 @@ import { Controls } from './components/Controls';
 import { PrintableSheet } from './components/PrintableSheet';
 import { NumericKeyboard } from './components/NumericKeyboard';
 import { generateTasks } from './services/taskGenerator';
-import { Difficulty, Language, Task } from './types';
+import { Difficulty, DisplayMode, Language, Task } from './types';
 import { translations } from './constants';
 
 const App: React.FC = () => {
   const [language, setLanguage] = useState<Language>('en');
   const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.VERY_EASY);
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(DisplayMode.SYMBOLS_ONLY);
   const [showDigits, setShowDigits] = useState<boolean>(true);
   const [interactiveMode, setInteractiveMode] = useState<boolean>(false);
   const [isBlackAndWhite, setIsBlackAndWhite] = useState<boolean>(false);
@@ -92,6 +93,8 @@ const App: React.FC = () => {
           t={t}
           difficulty={difficulty}
           setDifficulty={setDifficulty}
+          displayMode={displayMode}
+          setDisplayMode={setDisplayMode}
           showDigits={showDigits}
           setShowDigits={setShowDigits}
           interactiveMode={interactiveMode}
@@ -104,6 +107,7 @@ const App: React.FC = () => {
         <PrintableSheet
           tasks={tasks}
           showDigits={showDigits}
+          displayMode={displayMode}
           interactiveMode={interactiveMode}
           answers={answers}
           feedback={feedback}

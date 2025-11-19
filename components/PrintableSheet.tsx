@@ -1,10 +1,11 @@
 import React from 'react';
-import { Task } from '../types';
+import { DisplayMode, Task } from '../types';
 import { TaskRow } from './TaskRow';
 
 interface PrintableSheetProps {
   tasks: Task[];
   showDigits: boolean;
+  displayMode: DisplayMode;
   interactiveMode: boolean;
   answers: Record<number, string>;
   feedback: Record<number, boolean | null>;
@@ -17,6 +18,7 @@ interface PrintableSheetProps {
 export const PrintableSheet: React.FC<PrintableSheetProps> = ({
   tasks,
   showDigits,
+  displayMode,
   interactiveMode,
   answers,
   feedback,
@@ -49,6 +51,7 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({
           <TaskRow
             key={task.id}
             task={task}
+            displayMode={displayMode}
             isInteractive={interactiveMode}
             value={answers[task.id] || ''}
             feedback={feedback[task.id]}

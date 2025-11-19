@@ -1,6 +1,6 @@
 import React from 'react';
-import { Difficulty, Language } from '../types';
-import { DIFFICULTY_LEVELS, LANGUAGES } from '../constants';
+import { Difficulty, DisplayMode, Language } from '../types';
+import { DIFFICULTY_LEVELS, DISPLAY_MODES, LANGUAGES } from '../constants';
 
 interface ControlsProps {
   language: Language;
@@ -8,6 +8,8 @@ interface ControlsProps {
   t: any;
   difficulty: Difficulty;
   setDifficulty: (level: Difficulty) => void;
+  displayMode: DisplayMode;
+  setDisplayMode: (mode: DisplayMode) => void;
   showDigits: boolean;
   setShowDigits: (show: boolean) => void;
   interactiveMode: boolean;
@@ -39,6 +41,8 @@ export const Controls: React.FC<ControlsProps> = ({
   t,
   difficulty,
   setDifficulty,
+  displayMode,
+  setDisplayMode,
   showDigits,
   setShowDigits,
   interactiveMode,
@@ -82,6 +86,23 @@ export const Controls: React.FC<ControlsProps> = ({
                 }`}
               >
                 {t[level.langKey]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t.displayMode}</label>
+          <div className="flex flex-col space-y-2">
+            {DISPLAY_MODES.map(mode => (
+              <button
+                key={mode.id}
+                onClick={() => setDisplayMode(mode.id)}
+                className={`w-full text-left p-3 text-sm font-semibold rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-800 ${
+                  displayMode === mode.id ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-indigo-200 dark:hover:bg-slate-600'
+                }`}
+              >
+                {t[mode.langKey]}
               </button>
             ))}
           </div>

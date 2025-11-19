@@ -6,7 +6,7 @@ const getRandomElement = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr
 
 export const generateTasks = (difficulty: Difficulty, count: number, isBlackAndWhite: boolean): Task[] => {
   const tasks: Task[] = [];
-  const maxSum = difficulty === Difficulty.VERY_EASY ? 5 : 10;
+  const maxSum = difficulty === Difficulty.VERY_EASY ? 5 : difficulty === Difficulty.EASY ? 10 : 20;
   const usedAnswers = new Set<number>();
 
   // Select unique items (emojis or symbols) for each task
