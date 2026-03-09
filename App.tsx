@@ -3,7 +3,7 @@ import { Controls } from "./components/Controls";
 import { PrintableSheet } from "./components/PrintableSheet";
 import { NumericKeyboard } from "./components/NumericKeyboard";
 import { generateTasks } from "./services/taskGenerator";
-import { DisplayMode, Language, Task } from "./types";
+import { DisplayMode, Language, Operator, Task } from "./types";
 import { translations } from "./constants";
 
 const App: React.FC = () => {
@@ -31,6 +31,14 @@ const App: React.FC = () => {
     const saved = localStorage.getItem("isBlackAndWhite");
     return saved ? JSON.parse(saved) : false;
   });
+  const [operators, setOperators] = useState<Operator[]>(() => {
+    const saved = localStorage.getItem("operators");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+    return [Operator.ADDITION];
+  });
   const [tasks, setTasks] = useState<Task[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [feedback, setFeedback] = useState<Record<number, boolean | null>>({});
@@ -46,7 +54,8 @@ const App: React.FC = () => {
     localStorage.setItem("showDigits", JSON.stringify(showDigits));
     localStorage.setItem("interactiveMode", JSON.stringify(interactiveMode));
     localStorage.setItem("isBlackAndWhite", JSON.stringify(isBlackAndWhite));
-  }, [language, maxSum, displayMode, showDigits, interactiveMode, isBlackAndWhite]);
+    localStorage.setItem("operators", JSON.stringify(operators));
+  }, [language, maxSum, displayMode, showDigits, interactiveMode, isBlackAndWhite, operators]);
 
   // SEO Updates
   useEffect(() => {
@@ -62,20 +71,25 @@ const App: React.FC = () => {
     metaDescription.setAttribute('content', t.seoDescription);
   }, [language, t]);
 
+  const hasSymbolIncompatibleOperator = operators.some(
+    (op) => op === Operator.MULTIPLICATION || op === Operator.DIVISION
+  );
+
   // Restrictions
   useEffect(() => {
-    if (maxSum > 15 && displayMode !== DisplayMode.NUMBERS_ONLY) {
+    if ((maxSum > 15 || hasSymbolIncompatibleOperator) && displayMode !== DisplayMode.NUMBERS_ONLY) {
       setDisplayMode(DisplayMode.NUMBERS_ONLY);
     }
-  }, [maxSum, displayMode]);
+  }, [maxSum, displayMode, hasSymbolIncompatibleOperator]);
 
   const randomizeTasks = useCallback(() => {
-    const newTasks = generateTasks(maxSum, 5, isBlackAndWhite);
+    const noZeros = displayMode === DisplayMode.SYMBOLS_ONLY;
+    const newTasks = generateTasks(maxSum, 5, isBlackAndWhite, operators, noZeros);
     setTasks(newTasks);
     setAnswers({});
     setFeedback({});
     setActiveTaskIndex(null);
-  }, [maxSum, isBlackAndWhite]);
+  }, [maxSum, isBlackAndWhite, operators, displayMode]);
 
   useEffect(() => {
     randomizeTasks();
@@ -147,6 +161,8 @@ const App: React.FC = () => {
           onToggleInteractive={handleToggleInteractive}
           isBlackAndWhite={isBlackAndWhite}
           setIsBlackAndWhite={setIsBlackAndWhite}
+          operators={operators}
+          setOperators={setOperators}
           onRandomize={randomizeTasks}
           onPrint={handlePrint}
         />

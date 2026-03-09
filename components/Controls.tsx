@@ -1,6 +1,6 @@
 import React from 'react';
-import { DisplayMode, Language } from '../types';
-import { DIFFICULTY_STEPS, DISPLAY_MODES, LANGUAGES } from '../constants';
+import { DisplayMode, Language, Operator } from '../types';
+import { DIFFICULTY_STEPS, DISPLAY_MODES, LANGUAGES, OPERATOR_SYMBOLS } from '../constants';
 
 interface ControlsProps {
   language: Language;
@@ -16,6 +16,8 @@ interface ControlsProps {
   onToggleInteractive: () => void;
   isBlackAndWhite: boolean;
   setIsBlackAndWhite: (isBw: boolean) => void;
+  operators: Operator[];
+  setOperators: (ops: Operator[]) => void;
   onRandomize: () => void;
   onPrint: () => void;
 }
@@ -49,9 +51,30 @@ export const Controls: React.FC<ControlsProps> = ({
   onToggleInteractive,
   isBlackAndWhite,
   setIsBlackAndWhite,
+  operators,
+  setOperators,
   onRandomize,
   onPrint,
 }) => {
+  const toggleOperator = (op: Operator) => {
+    if (operators.includes(op)) {
+      if (operators.length <= 1) return; // Keep at least one
+      setOperators(operators.filter(o => o !== op));
+    } else {
+      setOperators([...operators, op]);
+    }
+  };
+
+  const operatorOptions: { id: Operator; langKey: string }[] = [
+    { id: Operator.ADDITION, langKey: 'addition' },
+    { id: Operator.SUBTRACTION, langKey: 'subtraction' },
+    { id: Operator.MULTIPLICATION, langKey: 'multiplication' },
+    { id: Operator.DIVISION, langKey: 'division' },
+  ];
+
+  const hasSymbolIncompatibleOperator = operators.some(
+    op => op === Operator.MULTIPLICATION || op === Operator.DIVISION
+  );
   return (
     <div className="w-full xl:w-96 bg-white dark:bg-slate-800 p-6 md:p-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none no-print flex-shrink-0 border border-slate-100 dark:border-slate-700">
       <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-8 font-display tracking-tight text-center xl:text-left">
@@ -99,10 +122,33 @@ export const Controls: React.FC<ControlsProps> = ({
         </div>
 
         <div className="space-y-3">
+          <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t.operators}</label>
+          <div className="grid grid-cols-2 gap-2">
+            {operatorOptions.map(op => {
+              const isActive = operators.includes(op.id);
+              return (
+                <button
+                  key={op.id}
+                  onClick={() => toggleOperator(op.id)}
+                  className={`flex items-center gap-2 px-3 py-2.5 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                    isActive
+                      ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                      : 'bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <span className="text-lg">{OPERATOR_SYMBOLS[op.id]}</span>
+                  {t[op.langKey]}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="space-y-3">
           <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t.displayMode}</label>
           <div className="flex flex-col space-y-2">
             {DISPLAY_MODES.map(mode => {
-              const isDisabled = maxSum > 15 && mode.id !== DisplayMode.NUMBERS_ONLY;
+              const isDisabled = (maxSum > 15 || hasSymbolIncompatibleOperator) && mode.id !== DisplayMode.NUMBERS_ONLY;
               return (
                 <button
                   key={mode.id}

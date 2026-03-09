@@ -1,97 +1,98 @@
-import { Task } from '../types';
+import { Operator, Task } from '../types';
 import { EMOJIS, SYMBOLS } from '../constants';
 
-const getRandomInt = (max: number) => Math.floor(Math.random() * (max + 1));
+const getRandomInt = (min: number, max: number) =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
+
 const getRandomElement = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
-export const generateTasks = (maxSum: number, count: number, isBlackAndWhite: boolean): Task[] => {
+interface GenResult { op1: number; op2: number; answer: number }
+
+const generateAddition = (maxSum: number, noZeros: boolean): GenResult => {
+  const minVal = noZeros ? 1 : 0;
+  const answer = getRandomInt(noZeros ? 2 : 1, maxSum);
+  const op1 = getRandomInt(minVal, answer - minVal);
+  return { op1, op2: answer - op1, answer };
+};
+
+const generateSubtraction = (maxSum: number, noZeros: boolean): GenResult => {
+  const minVal = noZeros ? 1 : 0;
+  const op1 = getRandomInt(noZeros ? 2 : 1, maxSum);
+  const op2 = getRandomInt(minVal, op1 - minVal);
+  return { op1, op2, answer: op1 - op2 };
+};
+
+const generateMultiplication = (maxSum: number): GenResult => {
+  const maxFactor = Math.max(1, Math.floor(Math.sqrt(maxSum)));
+  const op1 = getRandomInt(1, maxFactor);
+  const op2Max = Math.floor(maxSum / op1);
+  const op2 = getRandomInt(1, Math.max(1, op2Max));
+  return { op1, op2, answer: op1 * op2 };
+};
+
+const generateDivision = (maxSum: number): GenResult => {
+  const maxFactor = Math.max(1, Math.floor(Math.sqrt(maxSum)));
+  const divisor = getRandomInt(1, maxFactor);
+  const quotient = getRandomInt(1, Math.max(1, Math.floor(maxSum / divisor)));
+  const dividend = divisor * quotient;
+  return { op1: dividend, op2: divisor, answer: quotient };
+};
+
+const generate = (operator: Operator, maxSum: number, noZeros: boolean): GenResult => {
+  switch (operator) {
+    case Operator.ADDITION: return generateAddition(maxSum, noZeros);
+    case Operator.SUBTRACTION: return generateSubtraction(maxSum, noZeros);
+    case Operator.MULTIPLICATION: return generateMultiplication(maxSum);
+    case Operator.DIVISION: return generateDivision(maxSum);
+  }
+};
+
+export const generateTasks = (
+  maxSum: number,
+  count: number,
+  isBlackAndWhite: boolean,
+  operators: Operator[],
+  noZeros: boolean = false,
+): Task[] => {
   const tasks: Task[] = [];
   const usedProblems = new Set<string>();
 
-  // Select unique items (emojis or symbols) for each task
+  // Select unique items for each task
   const itemPool = isBlackAndWhite ? [...SYMBOLS] : [...EMOJIS];
   const selectedItems: string[] = [];
   for (let i = 0; i < count && itemPool.length > 0; i++) {
-    const randomIndex = Math.floor(Math.random() * itemPool.length);
-    selectedItems.push(itemPool[randomIndex]);
-    itemPool.splice(randomIndex, 1); // Remove to ensure uniqueness
+    const idx = Math.floor(Math.random() * itemPool.length);
+    selectedItems.push(itemPool[idx]);
+    itemPool.splice(idx, 1);
   }
-
-  // Helper to get a random integer with reduced probability for 0
-  const getWeightedRandomInt = (max: number): number => {
-    // 20% chance to allow 0, otherwise generate from 1 to max
-    // If max is 0, we must return 0
-    if (max === 0) return 0;
-    
-    if (Math.random() > 0.2) {
-        // Generate number between 1 and max
-        return Math.floor(Math.random() * max) + 1;
-    }
-    // Generate number between 0 and max (standard)
-    return Math.floor(Math.random() * (max + 1));
-  };
 
   for (let i = 0; i < count; i++) {
     let operand1 = 0;
     let operand2 = 0;
     let answer = 0;
+    let operator = getRandomElement(operators);
     let attempts = 0;
-    let problemKey = "";
+    let problemKey = '';
 
-    // Try to generate a unique problem
     do {
-        // Generate answer first to respect difficulty (maxSum)
-        // For answer, we generally want it to be > 0 if possible, but 0 is valid
-        answer = getWeightedRandomInt(maxSum);
-        
-        // Generate operand1 based on answer
-        // We also want to reduce 0 frequency for operands
-        if (answer === 0) {
-            operand1 = 0;
-        } else {
-            // Try to avoid 0 for operand1 if possible
-            if (Math.random() > 0.2) {
-                 operand1 = Math.floor(Math.random() * answer) + 1;
-                 // If we accidentally got > answer (shouldn't happen with logic above but safe guard)
-                 if (operand1 > answer) operand1 = answer; 
-            } else {
-                 operand1 = getRandomInt(answer);
-            }
-        }
-        
-        operand2 = answer - operand1;
+      operator = getRandomElement(operators);
+      const result = generate(operator, maxSum, noZeros);
+      operand1 = result.op1;
+      operand2 = result.op2;
+      answer = result.answer;
 
-        // Randomize order of operands for display
-        const [finalOp1, finalOp2] = Math.random() > 0.5 ? [operand1, operand2] : [operand2, operand1];
-        
-        // Store as "op1+op2" to check uniqueness. 
-        // Note: "2+7" and "7+2" are distinct strings here, so both are allowed as per requirements.
-        // The user said: "It is ok that both 2 +7 and 7 + 2 is present."
-        // But "Make sure a math problem is never dupicated." implies exact duplicates like "2+7" and "2+7" are bad.
-        problemKey = `${finalOp1}+${finalOp2}`;
-        
-        if (!usedProblems.has(problemKey)) {
-            operand1 = finalOp1;
-            operand2 = finalOp2;
-            break;
-        }
+      problemKey = `${operand1}${operator}${operand2}`;
 
-        attempts++;
-        // If we can't find unique problem after many attempts, just use what we have (unlikely with small count)
-        if (attempts > 100) break;
+      if (!usedProblems.has(problemKey)) break;
+      attempts++;
+      if (attempts > 100) break;
     } while (true);
 
     usedProblems.add(problemKey);
 
     const item = selectedItems[i] || (isBlackAndWhite ? getRandomElement(SYMBOLS) : getRandomElement(EMOJIS));
 
-    tasks.push({
-      id: i,
-      operand1: operand1,
-      operand2: operand2,
-      item: item,
-      answer: operand1 + operand2,
-    });
+    tasks.push({ id: i, operand1, operand2, operator, item, answer });
   }
   return tasks;
 };

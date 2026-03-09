@@ -1,6 +1,11 @@
 export type Language = 'en' | 'no';
 
-
+export enum Operator {
+  ADDITION = 'ADDITION',
+  SUBTRACTION = 'SUBTRACTION',
+  MULTIPLICATION = 'MULTIPLICATION',
+  DIVISION = 'DIVISION',
+}
 
 export enum DisplayMode {
   SYMBOLS_ONLY = 'SYMBOLS_ONLY',     // Only emojis/symbols
@@ -12,6 +17,7 @@ export interface Task {
   id: number;
   operand1: number;
   operand2: number;
+  operator: Operator;
   item: string;
   answer: number;
 }
