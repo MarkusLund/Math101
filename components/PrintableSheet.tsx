@@ -33,6 +33,18 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({
     <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg flex flex-col ${
       interactiveMode ? 'p-4 md:p-6' : 'p-8 md:p-12 h-full'
     }`}>
+      {!interactiveMode && (
+        <div className="flex justify-between items-baseline gap-8 pb-4 mb-4 text-slate-500 dark:text-slate-400 font-display">
+          <div className="flex items-baseline gap-2 flex-1">
+            <span className="text-sm font-bold uppercase tracking-wider whitespace-nowrap">{t.name}:</span>
+            <span className="flex-1 border-b-2 border-slate-300 dark:border-slate-600 h-6"></span>
+          </div>
+          <div className="flex items-baseline gap-2 flex-1">
+            <span className="text-sm font-bold uppercase tracking-wider whitespace-nowrap">{t.date}:</span>
+            <span className="flex-1 border-b-2 border-slate-300 dark:border-slate-600 h-6"></span>
+          </div>
+        </div>
+      )}
       {showDigits && (
         <div className={`flex justify-between items-center pb-4 border-b-4 border-slate-100 dark:border-slate-700 ${
           interactiveMode ? 'mb-4' : 'mb-8'
