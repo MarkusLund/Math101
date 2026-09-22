@@ -64,6 +64,7 @@ const App: React.FC = () => {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [feedback, setFeedback] = useState<Record<number, boolean | null>>({});
   const [activeTaskIndex, setActiveTaskIndex] = useState<number | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const t = translations[language];
 
@@ -84,7 +85,7 @@ const App: React.FC = () => {
   useEffect(() => {
     document.title = t.seoTitle;
     document.documentElement.lang = language;
-    
+
     let metaDescription = document.querySelector('meta[name="description"]');
     if (!metaDescription) {
       metaDescription = document.createElement('meta');
@@ -93,6 +94,25 @@ const App: React.FC = () => {
     }
     metaDescription.setAttribute('content', t.seoDescription);
   }, [language, t]);
+
+  // Lock background scrolling while the mobile settings sheet is open
+  useEffect(() => {
+    if (!settingsOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [settingsOpen]);
+
+  useEffect(() => {
+    if (!settingsOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSettingsOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [settingsOpen]);
 
   const hasSymbolIncompatibleOperator = operators.some(
     (op) => op === Operator.MULTIPLICATION || op === Operator.DIVISION
@@ -187,66 +207,144 @@ const App: React.FC = () => {
     }
   };
 
+  const controlsProps = {
+    language,
+    setLanguage,
+    t,
+    appMode,
+    setAppMode: handleAppModeChange,
+    signDifficulty,
+    setSignDifficulty,
+    maxSum,
+    setMaxSum,
+    displayMode,
+    setDisplayMode,
+    showDigits,
+    setShowDigits,
+    interactiveMode,
+    onToggleInteractive: handleToggleInteractive,
+    isBlackAndWhite,
+    setIsBlackAndWhite,
+    operators,
+    setOperators,
+    onRandomize: handleRandomize,
+    onPrint: handlePrint,
+  };
+
+  // Space reserved at the bottom for the docked keyboard / sign palette.
+  // The dock itself is hidden from sm (signs) / md (keyboard) upwards.
+  const bottomDockPadding = !interactiveMode
+    ? ''
+    : appMode === AppMode.SIGN_PUZZLE
+    ? 'pb-44 md:pb-4'
+    : 'pb-44 md:pb-4';
+
   return (
-    <div className="min-h-screen font-sans bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
+    <div className="min-h-screen font-sans bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200">
+      {/* Compact mobile top bar */}
+      <header className="no-print xl:hidden sticky top-0 z-30 flex items-center gap-1 px-3 py-2 bg-slate-50/85 dark:bg-slate-950/85 backdrop-blur-md">
+        <span className="font-display font-bold text-lg tracking-tight">
+          <span className="text-primary-500">Math</span> 101
+        </span>
+        <div className="ml-auto flex items-center gap-1">
+          <IconButton label={t.randomize} icon="refresh" onClick={handleRandomize} />
+          <IconButton label={t.print} icon="print" onClick={handlePrint} />
+          <IconButton
+            label={t.settings}
+            icon="tune"
+            onClick={() => setSettingsOpen(true)}
+            primary
+          />
+        </div>
+      </header>
+
       <main
-        className={`p-4 md:p-8 flex flex-col xl:flex-row gap-8 items-start justify-center ${
-          interactiveMode ? "pb-48 md:pb-8" : ""
+        className={`mx-auto flex w-full max-w-[1500px] flex-col items-start gap-4 px-2 pb-4 pt-1 sm:px-4 xl:flex-row xl:gap-6 xl:px-6 xl:pt-6 ${
+          bottomDockPadding
         }`}
       >
-        <Controls
-          language={language}
-          setLanguage={setLanguage}
-          t={t}
-          appMode={appMode}
-          setAppMode={handleAppModeChange}
-          signDifficulty={signDifficulty}
-          setSignDifficulty={setSignDifficulty}
-          maxSum={maxSum}
-          setMaxSum={setMaxSum}
-          displayMode={displayMode}
-          setDisplayMode={setDisplayMode}
-          showDigits={showDigits}
-          setShowDigits={setShowDigits}
-          interactiveMode={interactiveMode}
-          onToggleInteractive={handleToggleInteractive}
-          isBlackAndWhite={isBlackAndWhite}
-          setIsBlackAndWhite={setIsBlackAndWhite}
-          operators={operators}
-          setOperators={setOperators}
-          onRandomize={handleRandomize}
-          onPrint={handlePrint}
-        />
+        {/* Desktop sidebar */}
+        <aside className="no-print hidden xl:block xl:w-[22rem] xl:flex-shrink-0 xl:sticky xl:top-6">
+          <Controls {...controlsProps} />
+        </aside>
 
-        {appMode === AppMode.SIGN_PUZZLE ? (
-          <SignPuzzleSheet
-            tasks={signTasks}
-            interactiveMode={interactiveMode}
-            t={t}
-            isBlackAndWhite={isBlackAndWhite}
-            onRandomize={randomizeSignTasks}
-          />
-        ) : (
-          <PrintableSheet
-            tasks={tasks}
-            showDigits={showDigits}
-            displayMode={displayMode}
-            interactiveMode={interactiveMode}
-            answers={answers}
-            feedback={feedback}
-            onAnswerFocus={setActiveTaskIndex}
-            activeTaskIndex={activeTaskIndex}
-            t={t}
-            isBlackAndWhite={isBlackAndWhite}
-          />
-        )}
+        <div className="w-full min-w-0">
+          {appMode === AppMode.SIGN_PUZZLE ? (
+            <SignPuzzleSheet
+              tasks={signTasks}
+              interactiveMode={interactiveMode}
+              t={t}
+              isBlackAndWhite={isBlackAndWhite}
+              onRandomize={randomizeSignTasks}
+            />
+          ) : (
+            <PrintableSheet
+              tasks={tasks}
+              showDigits={showDigits}
+              displayMode={displayMode}
+              interactiveMode={interactiveMode}
+              answers={answers}
+              feedback={feedback}
+              onAnswerFocus={setActiveTaskIndex}
+              activeTaskIndex={activeTaskIndex}
+              t={t}
+              isBlackAndWhite={isBlackAndWhite}
+            />
+          )}
+        </div>
       </main>
+
       {interactiveMode && appMode === AppMode.CALCULATE && (
         <NumericKeyboard onKeyPress={handleKeyboardInput} />
+      )}
+
+      {/* Mobile settings sheet */}
+      {settingsOpen && (
+        <div className="no-print fixed inset-0 z-50 xl:hidden">
+          <div
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-fade-in"
+            onClick={() => setSettingsOpen(false)}
+          />
+          <div className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto overscroll-contain rounded-t-3xl bg-white dark:bg-slate-900 shadow-2xl animate-sheet-up pb-[env(safe-area-inset-bottom)]">
+            <div className="sticky top-0 z-10 flex items-center gap-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-4 pt-3 pb-2">
+              <div className="absolute left-1/2 top-1.5 h-1 w-10 -translate-x-1/2 rounded-full bg-slate-300 dark:bg-slate-700" />
+              <h2 className="font-display text-lg font-bold mt-2">{t.settings}</h2>
+              <button
+                onClick={() => setSettingsOpen(false)}
+                aria-label={t.close}
+                className="ml-auto mt-2 flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 active:scale-95 transition-transform"
+              >
+                <span className="material-symbols-rounded">close</span>
+              </button>
+            </div>
+            <div className="px-4 pb-6">
+              <Controls {...controlsProps} embedded />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
 };
 
-export default App;
+const IconButton: React.FC<{
+  icon: string;
+  label: string;
+  onClick: () => void;
+  primary?: boolean;
+}> = ({ icon, label, onClick, primary }) => (
+  <button
+    onClick={onClick}
+    aria-label={label}
+    title={label}
+    className={`flex h-10 w-10 items-center justify-center rounded-xl transition-transform active:scale-90 ${
+      primary
+        ? "bg-primary-500 text-white shadow-sm shadow-primary-500/30"
+        : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 shadow-sm"
+    }`}
+  >
+    <span className="material-symbols-rounded text-[22px]">{icon}</span>
+  </button>
+);
 
+export default App;

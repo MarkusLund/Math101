@@ -165,27 +165,46 @@
 
       @media screen {
         .print-preview-wrapper {
-          padding: 2rem;
-          background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-          border-radius: 1.5rem;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-            0 10px 10px -5px rgba(0, 0, 0, 0.04);
           display: flex;
           justify-content: center;
           overflow: auto;
         }
 
-        .dark .print-preview-wrapper {
-          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        .print-preview-frame {
+          border-radius: 1rem;
+          box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06),
+            0 8px 24px -12px rgba(15, 23, 42, 0.25);
+          transform-origin: top center;
         }
 
-        .print-preview-frame {
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
-            0 1px 2px rgba(0, 0, 0, 0.24);
-          transform-origin: top center;
-          /* Scale down if needed on small screens, handled by JS or container query ideally, 
-             but for now we rely on scrolling or simple max-width */
+        /* Below desktop the rigid A4 frame overflows the viewport, so the
+           preview goes fluid. Printing is unaffected: the print rules below
+           reset the frame to a full page again. */
+        @media (max-width: 1279px) {
+          .print-preview-frame {
+            width: 100%;
+            height: auto;
+            min-height: 50vh;
+          }
         }
+      }
+
+      @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes sheet-up {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
+
+      .animate-fade-in {
+        animation: fade-in 0.2s ease-out forwards;
+      }
+
+      .animate-sheet-up {
+        animation: sheet-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       }
 
       @media print {
@@ -227,6 +246,8 @@
         .print-preview-frame {
           width: 100% !important;
           height: 100% !important;
+          min-height: 0 !important;
+          border-radius: 0 !important;
           margin: 0 !important;
           page-break-after: always;
         }
@@ -242,7 +263,7 @@
       }
     </script>
   </head>
-  <body class="bg-slate-100 dark:bg-slate-900">
+  <body class="bg-slate-50 dark:bg-slate-950">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

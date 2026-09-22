@@ -17,7 +17,7 @@ test.describe('Print matches preview', () => {
     expect(screenTexts.length).toBeGreaterThan(0);
 
     // Controls panel should be visible in screen mode
-    const controls = page.locator('.no-print').first();
+    const controls = page.locator('aside.no-print');
     await expect(controls).toBeVisible();
 
     // Switch to print media

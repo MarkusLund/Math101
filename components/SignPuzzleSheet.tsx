@@ -12,7 +12,7 @@ interface SignPuzzleSheetProps {
 
 const SignGlyph: React.FC<{ sign: string | null; className?: string }> = ({
   sign,
-  className = "w-8 h-8 md:w-9 md:h-9",
+  className = 'w-8 h-8',
 }) => {
   if (sign === '+') {
     return (
@@ -39,7 +39,6 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
   isBlackAndWhite,
   onRandomize,
 }) => {
-
   // placements: taskId -> array of ('+' | '-' | null) for each operator slot
   const [placements, setPlacements] = useState<Record<number, (string | null)[]>>({});
   const [selectedSign, setSelectedSign] = useState<'+' | '-' | null>(null);
@@ -177,7 +176,6 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
     window.addEventListener('pointerup', onPointerUp);
   };
 
-
   // Check row validation
   const getRowFeedback = (task: SignPuzzleTask): boolean | null => {
     const userSigns = placements[task.id];
@@ -188,226 +186,196 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
     return evaluated === task.target;
   };
 
-  const allSolved =
-    tasks.length > 0 &&
-    tasks.every(task => getRowFeedback(task) === true);
+  const allSolved = tasks.length > 0 && tasks.every(task => getRowFeedback(task) === true);
+
+  /** The +/− pieces. Rendered inline on the sheet and in the mobile bottom dock. */
+  const renderSign = (sign: '+' | '-', size: string) => {
+    const isSelected = selectedSign === sign;
+    return (
+      <button
+        key={sign}
+        type="button"
+        draggable={interactiveMode}
+        onDragStart={e => handleDragStart(e, sign)}
+        onPointerDown={e => handlePointerDownSign(e, sign)}
+        onClick={() => interactiveMode && setSelectedSign(prev => (prev === sign ? null : sign))}
+        style={interactiveMode ? { touchAction: 'none' } : undefined}
+        aria-pressed={isSelected}
+        title={interactiveMode ? t.signPuzzleInstructions : undefined}
+        className={`${size} flex select-none items-center justify-center rounded-full transition-all duration-150 ${
+          interactiveMode
+            ? `cursor-grab active:cursor-grabbing active:scale-95 ${
+                isBlackAndWhite
+                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white'
+                  : sign === '+'
+                  ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400'
+                  : 'bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400'
+              } ${
+                // Selection keeps the sign's own colour and adds a ring, so the
+                // green/red identity stays readable for young kids.
+                isSelected
+                  ? 'scale-105 ring-4 ring-primary-400 ring-offset-2 ring-offset-white dark:ring-offset-slate-900'
+                  : ''
+              }`
+            : 'border-2 border-slate-700 text-slate-800'
+        }`}
+      >
+        <SignGlyph sign={sign} className="w-1/2 h-1/2" />
+      </button>
+    );
+  };
 
   const sheetContent = (
     <div
-      className={`bg-white dark:bg-slate-800 rounded-3xl shadow-lg flex flex-col transition-all duration-300 ${
-        interactiveMode ? 'p-6 md:p-8 max-w-3xl mx-auto w-full' : 'p-8 md:p-12 h-full'
+      className={`flex flex-col bg-white dark:bg-slate-900 ${
+        interactiveMode ? 'rounded-2xl p-3 sm:p-5' : 'h-full p-5 sm:p-8 md:p-12'
       }`}
     >
       {/* Name and Date on print worksheets */}
       {!interactiveMode && (
-        <div className="flex justify-between items-baseline gap-8 pb-4 mb-4 text-slate-500 dark:text-slate-400 font-display">
-          <div className="flex items-baseline gap-2 flex-1">
-            <span className="text-sm font-bold uppercase tracking-wider whitespace-nowrap">{t.name}:</span>
-            <span className="flex-1 border-b-2 border-slate-300 dark:border-slate-600 h-6"></span>
+        <div className="mb-5 flex items-baseline gap-8 font-display text-slate-500">
+          <div className="flex flex-1 items-baseline gap-2">
+            <span className="whitespace-nowrap text-sm font-bold uppercase tracking-wider">{t.name}:</span>
+            <span className="h-6 flex-1 border-b-2 border-slate-300"></span>
           </div>
-          <div className="flex items-baseline gap-2 flex-1">
-            <span className="text-sm font-bold uppercase tracking-wider whitespace-nowrap">{t.date}:</span>
-            <span className="flex-1 border-b-2 border-slate-300 dark:border-slate-600 h-6"></span>
+          <div className="flex flex-1 items-baseline gap-2">
+            <span className="whitespace-nowrap text-sm font-bold uppercase tracking-wider">{t.date}:</span>
+            <span className="h-6 flex-1 border-b-2 border-slate-300"></span>
           </div>
         </div>
       )}
 
-      {/* Safari Yoghurt Style Header */}
-      <div className="text-center mb-6">
-        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white font-display tracking-wide mb-1">
+      <div className="text-center">
+        <h2 className="font-display text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white sm:text-3xl">
           {t.signPuzzleTitle}
         </h2>
-        <p className="text-base md:text-lg text-slate-600 dark:text-slate-300 font-medium font-sans max-w-lg mx-auto">
+        <p className="mx-auto mt-1 max-w-md text-sm font-medium text-slate-500 dark:text-slate-400 sm:text-base">
           {t.signPuzzleSubtitle}
         </p>
       </div>
 
-      {/* Draggable / Reference Signs Header: (+) and (-) */}
-      <div className="flex flex-col items-center justify-center mb-6">
-        <div className="flex items-center justify-center gap-6 md:gap-8">
-          {(['+', '-'] as const).map(sign => {
-            const isSelected = selectedSign === sign;
-            return (
-              <div
-                key={sign}
-                draggable={interactiveMode}
-                onDragStart={e => handleDragStart(e, sign)}
-                onPointerDown={e => handlePointerDownSign(e, sign)}
-                onClick={() => setSelectedSign(prev => (prev === sign ? null : sign))}
-                style={interactiveMode ? { touchAction: 'none' } : undefined}
-                className={`flex items-center justify-center rounded-full select-none transition-all duration-200 ${
-                  interactiveMode
-                    ? `cursor-grab active:cursor-grabbing hover:scale-110 shadow-md ${
-                        isSelected
-                          ? 'ring-4 ring-primary-500 ring-offset-2 dark:ring-offset-slate-800 bg-primary-500 text-white scale-105'
-                          : isBlackAndWhite
-                          ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white border-2 border-slate-800 dark:border-slate-300'
-                          : sign === '+'
-                          ? 'bg-emerald-50 text-emerald-600 border-2 border-emerald-500 dark:bg-emerald-950/40 dark:text-emerald-400'
-                          : 'bg-rose-50 text-rose-600 border-2 border-rose-500 dark:bg-rose-950/40 dark:text-rose-400'
-                      }`
-                    : 'border-2 border-slate-700 dark:border-slate-300 text-slate-800 dark:text-slate-200'
-                } w-14 h-14 md:w-16 md:h-16`}
-                title={interactiveMode ? (t.signPuzzleInstructions || 'Drag or tap') : undefined}
-              >
-                <SignGlyph sign={sign} className="w-7 h-7 md:w-8 md:h-8" />
-              </div>
-            );
-          })}
-        </div>
-        {interactiveMode && (
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 font-medium">
-            {t.signPuzzleInstructions}
-          </p>
-        )}
+      {/* Reference signs — on mobile these live in the always-visible bottom dock instead */}
+      <div className={`mt-4 flex items-center justify-center gap-4 ${interactiveMode ? 'hidden md:flex' : 'flex'}`}>
+        {(['+', '-'] as const).map(sign => renderSign(sign, 'w-14 h-14'))}
       </div>
 
-      {/* Main Puzzle Card / Box (Safari yoghurt style border frame) */}
-      <div
-        className={`border-2 md:border-3 rounded-2xl md:rounded-3xl p-4 md:p-6 transition-colors ${
-          isBlackAndWhite
-            ? 'border-slate-800 dark:border-slate-400 bg-white dark:bg-slate-900/30'
-            : 'border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-800/40 shadow-inner'
-        }`}
-      >
-        <div className="divide-y divide-slate-200 dark:divide-slate-700/60">
-          {tasks.map(task => {
-            const feedback = getRowFeedback(task);
-            const userSigns = placements[task.id] || [];
+      {/* Task rows */}
+      <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800">
+        {tasks.map(task => {
+          const feedback = getRowFeedback(task);
+          const userSigns = placements[task.id] || [];
 
-            return (
-              <div
-                key={task.id}
-                className={`py-3 md:py-4 px-2 flex items-center justify-center flex-wrap gap-2 md:gap-4 transition-all rounded-xl ${
-                  feedback === true
-                    ? 'bg-emerald-50/60 dark:bg-emerald-950/20'
-                    : feedback === false
-                    ? 'bg-rose-50/60 dark:bg-rose-950/20'
-                    : ''
-                }`}
-              >
-                <div className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
-                  {task.numbers.map((num, idx) => (
-                    <React.Fragment key={idx}>
-                      {/* Number */}
-                      <span className="text-3xl md:text-5xl font-extrabold text-slate-800 dark:text-slate-100 font-display min-w-[1.5ch] text-center">
-                        {num}
-                      </span>
+          return (
+            <div
+              key={task.id}
+              className={`relative flex items-center justify-center rounded-xl px-1 py-2.5 transition-colors sm:py-3 ${
+                interactiveMode ? 'pr-10' : ''
+              } ${
+                feedback === true
+                  ? 'bg-emerald-50 dark:bg-emerald-500/10'
+                  : feedback === false
+                  ? 'bg-rose-50 dark:bg-rose-500/10'
+                  : ''
+              }`}
+            >
+              <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-3">
+                {task.numbers.map((num, idx) => (
+                  <React.Fragment key={idx}>
+                    <span className="min-w-[1.2ch] text-center font-display text-3xl font-extrabold text-slate-800 dark:text-slate-100 sm:text-5xl">
+                      {num}
+                    </span>
 
-                      {/* Operator Circle Slot */}
-                      {idx < task.numbers.length - 1 && (() => {
-                        const slotKey = `${task.id}:${idx}`;
-                        const currentSign = userSigns[idx] || null;
-                        const isOver = dragOverSlot === slotKey;
+                    {idx < task.numbers.length - 1 && (() => {
+                      const slotKey = `${task.id}:${idx}`;
+                      const currentSign = userSigns[idx] || null;
+                      const isOver = dragOverSlot === slotKey;
 
-                        return (
-                          <div
-                            data-sign-slot={slotKey}
-                            onClick={() => handleCircleClick(task.id, idx)}
-                            onDragOver={e => {
-                              e.preventDefault();
-                              e.dataTransfer.dropEffect = 'copy';
-                            }}
-                            onDragEnter={e => {
-                              e.preventDefault();
-                              setDragOverSlot(slotKey);
-                            }}
-                            onDragLeave={e => {
-                              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                                setDragOverSlot(null);
-                              }
-                            }}
-                            onDrop={e => handleDrop(e, task.id, idx)}
-                            className={`w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center select-none transition-all duration-150 ${
-                              interactiveMode
-                                ? `cursor-pointer ${
-                                    isOver
-                                      ? 'scale-110 border-4 border-primary-500 bg-primary-100 dark:bg-primary-900/50'
-                                      : currentSign
-                                      ? isBlackAndWhite
-                                        ? 'border-2 border-slate-900 dark:border-slate-200 bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                                        : currentSign === '+'
-                                        ? 'border-2 border-emerald-500 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 shadow-sm'
-                                        : 'border-2 border-rose-500 bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 shadow-sm'
-                                      : 'border-2 border-dashed border-slate-400 dark:border-slate-500 hover:border-primary-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'
-                                  }`
-                                : 'border-2 border-slate-700 dark:border-slate-300'
-                            }`}
-                            title={interactiveMode ? 'Click to change or drop + / −' : undefined}
-                          >
-                            {interactiveMode && currentSign && (
-                              <SignGlyph
-                                sign={currentSign}
-                                className="w-5 h-5 md:w-7 md:h-7 pointer-events-none select-none"
-                              />
-                            )}
-                          </div>
-                        );
-                      })()}
-                    </React.Fragment>
-                  ))}
+                      return (
+                        <div
+                          data-sign-slot={slotKey}
+                          onClick={() => handleCircleClick(task.id, idx)}
+                          onDragOver={e => {
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = 'copy';
+                          }}
+                          onDragEnter={e => {
+                            e.preventDefault();
+                            setDragOverSlot(slotKey);
+                          }}
+                          onDragLeave={e => {
+                            if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                              setDragOverSlot(null);
+                            }
+                          }}
+                          onDrop={e => handleDrop(e, task.id, idx)}
+                          className={`flex h-10 w-10 select-none items-center justify-center rounded-full transition-all duration-150 sm:h-14 sm:w-14 ${
+                            interactiveMode
+                              ? `cursor-pointer ${
+                                  isOver
+                                    ? 'scale-110 bg-primary-500 text-white'
+                                    : currentSign
+                                    ? isBlackAndWhite
+                                      ? 'bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-white'
+                                      : currentSign === '+'
+                                      ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300'
+                                      : 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-300'
+                                    : 'border-2 border-dashed border-slate-300 dark:border-slate-600'
+                                }`
+                              : 'border-2 border-slate-700'
+                          }`}
+                          title={interactiveMode ? t.signPuzzleInstructions : undefined}
+                        >
+                          {interactiveMode && currentSign && (
+                            <SignGlyph
+                              sign={currentSign}
+                              className="pointer-events-none h-5 w-5 select-none sm:h-7 sm:w-7"
+                            />
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </React.Fragment>
+                ))}
 
+                <span className="px-0.5 font-display text-3xl font-extrabold text-slate-400 dark:text-slate-500 sm:px-2 sm:text-5xl">
+                  =
+                </span>
 
+                <span className="min-w-[1.5ch] text-center font-display text-3xl font-extrabold text-slate-800 dark:text-slate-100 sm:text-5xl">
+                  {task.target}
+                </span>
+              </div>
 
-                  {/* Equals sign */}
-                  <span className="text-3xl md:text-5xl font-extrabold text-slate-700 dark:text-slate-300 font-display px-1 md:px-2">
-                    =
-                  </span>
-
-                  {/* Target result */}
-                  <span className="text-3xl md:text-5xl font-extrabold text-slate-800 dark:text-slate-100 font-display min-w-[2ch] text-center">
-                    {task.target}
-                  </span>
+              {/* Status indicator — absolute so it never wraps onto its own line */}
+              {interactiveMode && feedback !== null && (
+                <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                  {feedback ? (
+                    <span className="material-symbols-rounded animate-check-pop text-[28px] text-emerald-500">
+                      check_circle
+                    </span>
+                  ) : (
+                    <span className="material-symbols-rounded animate-wrong-shake text-[28px] text-rose-400">
+                      cancel
+                    </span>
+                  )}
                 </div>
-
-                {/* Interactive Status Indicator */}
-                {interactiveMode && (
-                  <div className="w-10 flex items-center justify-center">
-                    {feedback === true && (
-                      <div className="relative w-9 h-9 animate-check-pop">
-                        {/* Animated ring fill */}
-                        <svg className="absolute inset-0 w-9 h-9" viewBox="0 0 36 36">
-                          <circle
-                            cx="18" cy="18" r="15"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                            className="text-emerald-400 animate-ring-fill"
-                            strokeDasharray="100"
-                            strokeDashoffset="100"
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                        {/* Checkmark icon */}
-                        <span className="absolute inset-0 flex items-center justify-center text-emerald-500 text-3xl material-symbols-rounded">
-                          check_circle
-                        </span>
-                      </div>
-                    )}
-                    {feedback === false && (
-                      <span className="text-rose-500 text-3xl material-symbols-rounded animate-wrong-shake">
-                        cancel
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
-      {/* Completion Celebration in interactive mode */}
+      {/* Completion celebration */}
       {interactiveMode && allSolved && (
-        <div className="mt-6 p-4 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 border border-emerald-300 dark:border-emerald-700 text-center animate-fade-in">
-          <p className="text-2xl font-black text-emerald-800 dark:text-emerald-200 font-display mb-2">
+        <div className="mt-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 p-4 text-center animate-fade-in">
+          <p className="mb-2 font-display text-xl font-black text-emerald-700 dark:text-emerald-300">
             {t.puzzleAllCorrect}
           </p>
           <button
             onClick={onRandomize}
-            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 font-bold text-white transition-transform active:scale-95"
           >
-            <span className="material-symbols-rounded">refresh</span>
+            <span className="material-symbols-rounded text-[20px]">refresh</span>
             {t.randomize}
           </button>
         </div>
@@ -427,20 +395,30 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
             pointerEvents: 'none',
             zIndex: 9999,
           }}
-          className={`w-14 h-14 rounded-full flex items-center justify-center text-3xl font-black font-display shadow-2xl opacity-90 scale-110 ${
-            pointerDrag.sign === '+'
-              ? 'bg-emerald-500 text-white border-2 border-white'
-              : 'bg-rose-500 text-white border-2 border-white'
+          className={`flex h-14 w-14 items-center justify-center rounded-full opacity-95 shadow-2xl ${
+            pointerDrag.sign === '+' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'
           }`}
         >
-          <SignGlyph sign={pointerDrag.sign} className="w-7 h-7" />
+          <SignGlyph sign={pointerDrag.sign} className="h-7 w-7" />
         </div>
       )}
 
       {interactiveMode ? (
-        <div className="w-full max-w-2xl mx-auto">{sheetContent}</div>
+        <>
+          <div className="mx-auto w-full max-w-2xl">{sheetContent}</div>
+
+          {/* Always-available sign dock on small screens */}
+          <div className="no-print fixed inset-x-0 bottom-0 z-20 border-t border-slate-200/60 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md pb-[env(safe-area-inset-bottom)] md:hidden">
+            <div className="flex items-center justify-center gap-5 px-4 py-3">
+              {(['+', '-'] as const).map(sign => renderSign(sign, 'w-16 h-16 shadow-md'))}
+            </div>
+            <p className="pb-2 text-center text-[11px] font-medium text-slate-400">
+              {t.signPuzzleInstructions}
+            </p>
+          </div>
+        </>
       ) : (
-        <div className="w-full flex justify-center items-start print-preview-wrapper">
+        <div className="print-preview-wrapper flex w-full items-start justify-center">
           <div className="print-preview-frame">
             <div className="printable-sheet h-full">{sheetContent}</div>
           </div>

@@ -49,6 +49,8 @@ export const translations = {
     signDifficultyHard: "Hard (4 numbers)",
     puzzleAllCorrect: "Awesome! Everything is correct! 🎉",
     clear: "Clear",
+    settings: "Settings",
+    close: "Close",
   },
   no: {
     title: "Matteoppgave-generator",
@@ -88,6 +90,8 @@ export const translations = {
     signDifficultyHard: "Vanskelig (4 tall)",
     puzzleAllCorrect: "Kjempebra! Alt er riktig! 🎉",
     clear: "Tøm",
+    settings: "Innstillinger",
+    close: "Lukk",
   },
 };
 
