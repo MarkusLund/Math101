@@ -1,11 +1,21 @@
 import React from 'react';
-import { DisplayMode, Language, Operator } from '../types';
-import { DIFFICULTY_STEPS, DISPLAY_MODES, LANGUAGES, OPERATOR_SYMBOLS } from '../constants';
+import { AppMode, DisplayMode, Language, Operator, SignPuzzleDifficulty } from '../types';
+import {
+  DIFFICULTY_STEPS,
+  DISPLAY_MODES,
+  LANGUAGES,
+  OPERATOR_SYMBOLS,
+  SIGN_PUZZLE_DIFFICULTIES,
+} from '../constants';
 
 interface ControlsProps {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: any;
+  appMode: AppMode;
+  setAppMode: (mode: AppMode) => void;
+  signDifficulty: SignPuzzleDifficulty;
+  setSignDifficulty: (diff: SignPuzzleDifficulty) => void;
   maxSum: number;
   setMaxSum: (sum: number) => void;
   displayMode: DisplayMode;
@@ -41,6 +51,10 @@ export const Controls: React.FC<ControlsProps> = ({
   language,
   setLanguage,
   t,
+  appMode,
+  setAppMode,
+  signDifficulty,
+  setSignDifficulty,
   maxSum,
   setMaxSum,
   displayMode,
@@ -75,23 +89,58 @@ export const Controls: React.FC<ControlsProps> = ({
   const hasSymbolIncompatibleOperator = operators.some(
     op => op === Operator.MULTIPLICATION || op === Operator.DIVISION
   );
+
   return (
     <div className="w-full xl:w-96 bg-white dark:bg-slate-800 p-6 md:p-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none no-print flex-shrink-0 border border-slate-100 dark:border-slate-700">
-      <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-8 font-display tracking-tight text-center xl:text-left">
+      <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-6 font-display tracking-tight text-center xl:text-left">
         <span className="text-primary-500">Math</span> 101
       </h1>
 
-      <div className="space-y-8">
-        <div className="space-y-3">
-          <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t.language}</label>
+      <div className="space-y-6">
+        {/* Mode Switcher */}
+        <div className="space-y-2">
+          <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            {t.mode}
+          </label>
+          <div className="grid grid-cols-2 bg-slate-100 dark:bg-slate-900/50 rounded-xl p-1.5 gap-1">
+            <button
+              onClick={() => setAppMode(AppMode.CALCULATE)}
+              className={`py-2 px-2 text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                appMode === AppMode.CALCULATE
+                  ? 'bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              <span>📝</span>
+              <span className="truncate">{t.modeCalculate}</span>
+            </button>
+            <button
+              onClick={() => setAppMode(AppMode.SIGN_PUZZLE)}
+              className={`py-2 px-2 text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                appMode === AppMode.SIGN_PUZZLE
+                  ? 'bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              <span>➕➖</span>
+              <span className="truncate">{t.modeSignPuzzle}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Language selector */}
+        <div className="space-y-2">
+          <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            {t.language}
+          </label>
           <div className="flex bg-slate-100 dark:bg-slate-900/50 rounded-xl p-1.5 gap-1">
             {LANGUAGES.map(lang => (
               <button
                 key={lang.id}
                 onClick={() => setLanguage(lang.id as Language)}
-                className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-                  language === lang.id 
-                    ? 'bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5' 
+                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                  language === lang.id
+                    ? 'bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5'
                     : 'text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
               >
@@ -100,88 +149,143 @@ export const Controls: React.FC<ControlsProps> = ({
             ))}
           </div>
         </div>
-      
-        <div className="space-y-3">
-          <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-            {t.difficulty}: <span className="text-primary-600 dark:text-primary-400 text-lg">{maxSum}</span>
-          </label>
-          <div className="px-2">
-            <input
-              type="range"
-              min="0"
-              max={DIFFICULTY_STEPS.length - 1}
-              value={DIFFICULTY_STEPS.indexOf(maxSum)}
-              onChange={(e) => setMaxSum(DIFFICULTY_STEPS[parseInt(e.target.value)])}
-              className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
-            />
-            <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium">
-              <span>{DIFFICULTY_STEPS[0]}</span>
-              <span>{DIFFICULTY_STEPS[DIFFICULTY_STEPS.length - 1]}</span>
+
+        {/* SIGN PUZZLE CONTROLS */}
+        {appMode === AppMode.SIGN_PUZZLE && (
+          <>
+            <div className="space-y-3">
+              <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {t.difficulty}
+              </label>
+              <div className="flex flex-col space-y-2">
+                {SIGN_PUZZLE_DIFFICULTIES.map(diff => (
+                  <button
+                    key={diff.id}
+                    onClick={() => setSignDifficulty(diff.id)}
+                    className={`w-full text-left px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                      signDifficulty === diff.id
+                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30 transform scale-[1.02]'
+                        : 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {t[diff.langKey]}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div className="space-y-3">
-          <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t.operators}</label>
-          <div className="grid grid-cols-2 gap-2">
-            {operatorOptions.map(op => {
-              const isActive = operators.includes(op.id);
-              return (
-                <button
-                  key={op.id}
-                  onClick={() => toggleOperator(op.id)}
-                  className={`flex items-center gap-2 px-3 py-2.5 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-                    isActive
-                      ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
-                      : 'bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  <span className="text-lg">{OPERATOR_SYMBOLS[op.id]}</span>
-                  {t[op.langKey]}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+            <div className="space-y-4 pt-2">
+              <ToggleButton
+                checked={interactiveMode}
+                onChange={onToggleInteractive}
+                label={t.interactiveMode}
+              />
+              <ToggleButton
+                checked={isBlackAndWhite}
+                onChange={() => setIsBlackAndWhite(!isBlackAndWhite)}
+                label={t.blackAndWhiteMode}
+              />
+            </div>
+          </>
+        )}
 
-        <div className="space-y-3">
-          <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t.displayMode}</label>
-          <div className="flex flex-col space-y-2">
-            {DISPLAY_MODES.map(mode => {
-              const isDisabled = (maxSum > 15 || hasSymbolIncompatibleOperator) && mode.id !== DisplayMode.NUMBERS_ONLY;
-              return (
-                <button
-                  key={mode.id}
-                  onClick={() => !isDisabled && setDisplayMode(mode.id)}
-                  disabled={isDisabled}
-                  className={`w-full text-left px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
-                    displayMode === mode.id 
-                      ? 'bg-accent-500 text-white shadow-lg shadow-accent-500/30 transform scale-[1.02]' 
-                      : isDisabled
-                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50'
-                        : 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:pl-5'
-                  }`}
-                >
-                  {t[mode.langKey]}
-                  {isDisabled && <span className="ml-2 text-xs opacity-70">(Max 15)</span>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        {/* STANDARD CALCULATE CONTROLS */}
+        {appMode === AppMode.CALCULATE && (
+          <>
+            <div className="space-y-3">
+              <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                {t.difficulty}: <span className="text-primary-600 dark:text-primary-400 text-lg">{maxSum}</span>
+              </label>
+              <div className="px-2">
+                <input
+                  type="range"
+                  min="0"
+                  max={DIFFICULTY_STEPS.length - 1}
+                  value={DIFFICULTY_STEPS.indexOf(maxSum)}
+                  onChange={(e) => setMaxSum(DIFFICULTY_STEPS[parseInt(e.target.value)])}
+                  className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                />
+                <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium">
+                  <span>{DIFFICULTY_STEPS[0]}</span>
+                  <span>{DIFFICULTY_STEPS[DIFFICULTY_STEPS.length - 1]}</span>
+                </div>
+              </div>
+            </div>
 
-        <div className="space-y-4 pt-2">
-          <ToggleButton checked={showDigits} onChange={() => setShowDigits(!showDigits)} label={t.showDigits} />
-          <ToggleButton checked={interactiveMode} onChange={onToggleInteractive} label={t.interactiveMode} />
-          <ToggleButton checked={isBlackAndWhite} onChange={() => setIsBlackAndWhite(!isBlackAndWhite)} label={t.blackAndWhiteMode} />
-        </div>
+            <div className="space-y-3">
+              <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {t.operators}
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {operatorOptions.map(op => {
+                  const isActive = operators.includes(op.id);
+                  return (
+                    <button
+                      key={op.id}
+                      onClick={() => toggleOperator(op.id)}
+                      className={`flex items-center gap-2 px-3 py-2.5 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                        isActive
+                          ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                          : 'bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      <span className="text-lg">{OPERATOR_SYMBOLS[op.id]}</span>
+                      {t[op.langKey]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-        <div className="border-t border-slate-100 dark:border-slate-700 pt-8 space-y-4">
-          <button onClick={onRandomize} className="w-full flex items-center justify-center gap-2 bg-primary-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-primary-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shadow-lg shadow-primary-600/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary-500 dark:focus-visible:ring-offset-slate-800">
+            <div className="space-y-3">
+              <label className="block text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {t.displayMode}
+              </label>
+              <div className="flex flex-col space-y-2">
+                {DISPLAY_MODES.map(mode => {
+                  const isDisabled = (maxSum > 15 || hasSymbolIncompatibleOperator) && mode.id !== DisplayMode.NUMBERS_ONLY;
+                  return (
+                    <button
+                      key={mode.id}
+                      onClick={() => !isDisabled && setDisplayMode(mode.id)}
+                      disabled={isDisabled}
+                      className={`w-full text-left px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+                        displayMode === mode.id 
+                          ? 'bg-accent-500 text-white shadow-lg shadow-accent-500/30 transform scale-[1.02]' 
+                          : isDisabled
+                            ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50'
+                            : 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:pl-5'
+                      }`}
+                    >
+                      {t[mode.langKey]}
+                      {isDisabled && <span className="ml-2 text-xs opacity-70">(Max 15)</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-2">
+              <ToggleButton checked={showDigits} onChange={() => setShowDigits(!showDigits)} label={t.showDigits} />
+              <ToggleButton checked={interactiveMode} onChange={onToggleInteractive} label={t.interactiveMode} />
+              <ToggleButton checked={isBlackAndWhite} onChange={() => setIsBlackAndWhite(!isBlackAndWhite)} label={t.blackAndWhiteMode} />
+            </div>
+          </>
+        )}
+
+        {/* Action Buttons */}
+        <div className="border-t border-slate-100 dark:border-slate-700 pt-6 space-y-3">
+          <button
+            onClick={onRandomize}
+            className="w-full flex items-center justify-center gap-2 bg-primary-600 text-white font-bold py-3.5 px-6 rounded-xl hover:bg-primary-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shadow-lg shadow-primary-600/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary-500 dark:focus-visible:ring-offset-slate-800"
+          >
             <span className="material-symbols-rounded">refresh</span>
             {t.randomize}
           </button>
-          <button onClick={onPrint} className="w-full flex items-center justify-center gap-2 bg-slate-800 dark:bg-slate-700 text-white font-bold py-4 px-6 rounded-xl hover:bg-slate-900 dark:hover:bg-slate-600 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shadow-lg shadow-slate-800/20 dark:shadow-slate-700/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-500 dark:focus-visible:ring-offset-slate-800">
+          <button
+            onClick={onPrint}
+            className="w-full flex items-center justify-center gap-2 bg-slate-800 dark:bg-slate-700 text-white font-bold py-3.5 px-6 rounded-xl hover:bg-slate-900 dark:hover:bg-slate-600 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shadow-lg shadow-slate-800/20 dark:shadow-slate-700/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-500 dark:focus-visible:ring-offset-slate-800"
+          >
             <span className="material-symbols-rounded">print</span>
             {t.print}
           </button>

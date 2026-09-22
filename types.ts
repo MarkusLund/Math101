@@ -21,3 +21,21 @@ export interface Task {
   item: string;
   answer: number;
 }
+
+export enum AppMode {
+  CALCULATE = 'CALCULATE',
+  SIGN_PUZZLE = 'SIGN_PUZZLE',
+}
+
+export enum SignPuzzleDifficulty {
+  EASY = 'EASY',
+  MEDIUM = 'MEDIUM',
+  HARD = 'HARD',
+}
+
+export interface SignPuzzleTask {
+  id: number;
+  numbers: number[];
+  target: number;
+  solution: ('+' | '-')[];
+}

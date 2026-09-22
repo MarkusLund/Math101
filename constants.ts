@@ -1,4 +1,4 @@
-import { DisplayMode, Operator } from './types';
+import { DisplayMode, Operator, SignPuzzleDifficulty } from './types';
 
 export const EMOJIS = ['⚽️', '🚗', '🚜', '🍎', '🍌', '🐶', '🐱', '🚀', '⭐', '❤️', '🍓', '🧸'];
 export const SYMBOLS = ['kid_star', 'toys', 'favorite', 'local_shipping', 'agriculture', 'trophy', 'electric_bolt'];
@@ -13,6 +13,9 @@ export const OPERATOR_SYMBOLS: Record<Operator, string> = {
 export const translations = {
   en: {
     title: "Math Task Generator",
+    mode: "Mode",
+    modeCalculate: "Calculate",
+    modeSignPuzzle: "Fill in Signs (+ / −)",
     difficulty: "Difficulty",
     veryEasy: "Very Easy (Sums to 5)",
     easy: "Easy (Sums to 10)",
@@ -38,9 +41,20 @@ export const translations = {
     date: "Date",
     seoTitle: "Math Task Generator - Free Printable Math Worksheets for Kids",
     seoDescription: "Generate and print free math worksheets for kids. Customize difficulty, use symbols or numbers, and practice math with this easy-to-use tool.",
+    signPuzzleTitle: "Math Task",
+    signPuzzleSubtitle: "Put plus or minus in the circles below so it matches the sum.",
+    signPuzzleInstructions: "Drag or tap plus (+) and minus (−) to fill the circles.",
+    signDifficultyEasy: "Easy (2 numbers)",
+    signDifficultyMedium: "Medium (3 numbers)",
+    signDifficultyHard: "Hard (4 numbers)",
+    puzzleAllCorrect: "Awesome! Everything is correct! 🎉",
+    clear: "Clear",
   },
   no: {
     title: "Matteoppgave-generator",
+    mode: "Modus",
+    modeCalculate: "Regn ut svar",
+    modeSignPuzzle: "Sett inn tegn (+ / −)",
     difficulty: "Vanskelighetsgrad",
     veryEasy: "Veldig Lett (Summer til 5)",
     easy: "Lett (Summer til 10)",
@@ -66,6 +80,14 @@ export const translations = {
     date: "Dato",
     seoTitle: "Matteoppgave-generator - Gratis Utskriftsvennlige Matteark for Barn",
     seoDescription: "Lag og skriv ut gratis matteark for barn. Tilpass vanskelighetsgrad, bruk symboler eller tall, og øv på matte med dette enkle verktøyet.",
+    signPuzzleTitle: "Matteoppgave",
+    signPuzzleSubtitle: "Sett pluss eller minus i sirklene under slik at det stemmer med summen.",
+    signPuzzleInstructions: "Dra eller trykk på pluss (+) og minus (−) for å fylle sirklene.",
+    signDifficultyEasy: "Lett (2 tall)",
+    signDifficultyMedium: "Middels (3 tall)",
+    signDifficultyHard: "Vanskelig (4 tall)",
+    puzzleAllCorrect: "Kjempebra! Alt er riktig! 🎉",
+    clear: "Tøm",
   },
 };
 
@@ -75,6 +97,12 @@ export const DISPLAY_MODES = [
   { id: DisplayMode.SYMBOLS_ONLY, langKey: 'symbolsOnly' },
   { id: DisplayMode.MIXED, langKey: 'mixed' },
   { id: DisplayMode.NUMBERS_ONLY, langKey: 'numbersOnly' },
+];
+
+export const SIGN_PUZZLE_DIFFICULTIES = [
+  { id: SignPuzzleDifficulty.EASY, langKey: 'signDifficultyEasy' },
+  { id: SignPuzzleDifficulty.MEDIUM, langKey: 'signDifficultyMedium' },
+  { id: SignPuzzleDifficulty.HARD, langKey: 'signDifficultyHard' },
 ];
 
 export const LANGUAGES = [

@@ -1,15 +1,33 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Controls } from "./components/Controls";
 import { PrintableSheet } from "./components/PrintableSheet";
+import { SignPuzzleSheet } from "./components/SignPuzzleSheet";
 import { NumericKeyboard } from "./components/NumericKeyboard";
 import { generateTasks } from "./services/taskGenerator";
-import { DisplayMode, Language, Operator, Task } from "./types";
+import { generateSignPuzzles } from "./services/signPuzzleGenerator";
+import {
+  AppMode,
+  DisplayMode,
+  Language,
+  Operator,
+  SignPuzzleDifficulty,
+  SignPuzzleTask,
+  Task,
+} from "./types";
 import { translations } from "./constants";
 
 const App: React.FC = () => {
   const [language, setLanguage] = useState<Language>(() => {
     const saved = localStorage.getItem("language");
     return (saved as Language) || "no";
+  });
+  const [appMode, setAppMode] = useState<AppMode>(() => {
+    const saved = localStorage.getItem("appMode");
+    return (saved as AppMode) || AppMode.CALCULATE;
+  });
+  const [signDifficulty, setSignDifficulty] = useState<SignPuzzleDifficulty>(() => {
+    const saved = localStorage.getItem("signDifficulty");
+    return (saved as SignPuzzleDifficulty) || SignPuzzleDifficulty.MEDIUM;
   });
   const [maxSum, setMaxSum] = useState<number>(() => {
     const saved = localStorage.getItem("maxSum");
@@ -24,6 +42,8 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : true;
   });
   const [interactiveMode, setInteractiveMode] = useState<boolean>(() => {
+    const savedMode = localStorage.getItem("appMode");
+    if (savedMode === AppMode.SIGN_PUZZLE) return true;
     const saved = localStorage.getItem("interactiveMode");
     return saved ? JSON.parse(saved) : false;
   });
@@ -40,6 +60,7 @@ const App: React.FC = () => {
     return [Operator.ADDITION];
   });
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [signTasks, setSignTasks] = useState<SignPuzzleTask[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [feedback, setFeedback] = useState<Record<number, boolean | null>>({});
   const [activeTaskIndex, setActiveTaskIndex] = useState<number | null>(null);
@@ -49,13 +70,15 @@ const App: React.FC = () => {
   // Persistence
   useEffect(() => {
     localStorage.setItem("language", language);
+    localStorage.setItem("appMode", appMode);
+    localStorage.setItem("signDifficulty", signDifficulty);
     localStorage.setItem("maxSum", maxSum.toString());
     localStorage.setItem("displayMode", displayMode);
     localStorage.setItem("showDigits", JSON.stringify(showDigits));
     localStorage.setItem("interactiveMode", JSON.stringify(interactiveMode));
     localStorage.setItem("isBlackAndWhite", JSON.stringify(isBlackAndWhite));
     localStorage.setItem("operators", JSON.stringify(operators));
-  }, [language, maxSum, displayMode, showDigits, interactiveMode, isBlackAndWhite, operators]);
+  }, [language, appMode, signDifficulty, maxSum, displayMode, showDigits, interactiveMode, isBlackAndWhite, operators]);
 
   // SEO Updates
   useEffect(() => {
@@ -91,14 +114,31 @@ const App: React.FC = () => {
     setActiveTaskIndex(null);
   }, [maxSum, isBlackAndWhite, operators, displayMode]);
 
+  const randomizeSignTasks = useCallback(() => {
+    const newSignTasks = generateSignPuzzles(signDifficulty, 5);
+    setSignTasks(newSignTasks);
+  }, [signDifficulty]);
+
   useEffect(() => {
     randomizeTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
+    randomizeSignTasks();
+  }, [randomizeSignTasks]);
+
+  useEffect(() => {
     randomizeTasks();
   }, [maxSum, isBlackAndWhite, randomizeTasks]);
+
+  const handleRandomize = () => {
+    if (appMode === AppMode.SIGN_PUZZLE) {
+      randomizeSignTasks();
+    } else {
+      randomizeTasks();
+    }
+  };
 
   const handleAnswerChange = (taskId: number, value: string) => {
     const newAnswers = { ...answers, [taskId]: value };
@@ -140,6 +180,13 @@ const App: React.FC = () => {
     handleAnswerChange(activeTaskIndex, newAnswer);
   };
 
+  const handleAppModeChange = (mode: AppMode) => {
+    setAppMode(mode);
+    if (mode === AppMode.SIGN_PUZZLE) {
+      setInteractiveMode(true);
+    }
+  };
+
   return (
     <div className="min-h-screen font-sans bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
       <main
@@ -151,6 +198,10 @@ const App: React.FC = () => {
           language={language}
           setLanguage={setLanguage}
           t={t}
+          appMode={appMode}
+          setAppMode={handleAppModeChange}
+          signDifficulty={signDifficulty}
+          setSignDifficulty={setSignDifficulty}
           maxSum={maxSum}
           setMaxSum={setMaxSum}
           displayMode={displayMode}
@@ -163,25 +214,39 @@ const App: React.FC = () => {
           setIsBlackAndWhite={setIsBlackAndWhite}
           operators={operators}
           setOperators={setOperators}
-          onRandomize={randomizeTasks}
+          onRandomize={handleRandomize}
           onPrint={handlePrint}
         />
-        <PrintableSheet
-          tasks={tasks}
-          showDigits={showDigits}
-          displayMode={displayMode}
-          interactiveMode={interactiveMode}
-          answers={answers}
-          feedback={feedback}
-          onAnswerFocus={setActiveTaskIndex}
-          activeTaskIndex={activeTaskIndex}
-          t={t}
-          isBlackAndWhite={isBlackAndWhite}
-        />
+
+        {appMode === AppMode.SIGN_PUZZLE ? (
+          <SignPuzzleSheet
+            tasks={signTasks}
+            interactiveMode={interactiveMode}
+            t={t}
+            isBlackAndWhite={isBlackAndWhite}
+            onRandomize={randomizeSignTasks}
+          />
+        ) : (
+          <PrintableSheet
+            tasks={tasks}
+            showDigits={showDigits}
+            displayMode={displayMode}
+            interactiveMode={interactiveMode}
+            answers={answers}
+            feedback={feedback}
+            onAnswerFocus={setActiveTaskIndex}
+            activeTaskIndex={activeTaskIndex}
+            t={t}
+            isBlackAndWhite={isBlackAndWhite}
+          />
+        )}
       </main>
-      {interactiveMode && <NumericKeyboard onKeyPress={handleKeyboardInput} />}
+      {interactiveMode && appMode === AppMode.CALCULATE && (
+        <NumericKeyboard onKeyPress={handleKeyboardInput} />
+      )}
     </div>
   );
 };
 
 export default App;
+
