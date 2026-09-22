@@ -118,12 +118,22 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
     // Only handle primary touch pointer
     if (e.button !== 0) return;
 
+    // Prevent the browser from scrolling the page while dragging
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Capture the pointer so all future events route to this element
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+
     const startX = e.clientX;
     const startY = e.clientY;
+    const pointerId = e.pointerId;
 
     let hasMoved = false;
 
     const onPointerMove = (moveEvent: PointerEvent) => {
+      // Prevent any scroll that might try to fire
+      moveEvent.preventDefault();
       const dist = Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY);
       if (dist > 5) {
         hasMoved = true;
@@ -138,6 +148,11 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
     const onPointerUp = (upEvent: PointerEvent) => {
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
+
+      // Release the captured pointer
+      try {
+        (e.target as HTMLElement).releasePointerCapture(pointerId);
+      } catch (_) { /* already released */ }
 
       if (hasMoved) {
         // Check what element is beneath the pointer
@@ -158,7 +173,7 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
       setPointerDrag(null);
     };
 
-    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
     window.addEventListener('pointerup', onPointerUp);
   };
 
@@ -219,6 +234,7 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
                 onDragStart={e => handleDragStart(e, sign)}
                 onPointerDown={e => handlePointerDownSign(e, sign)}
                 onClick={() => setSelectedSign(prev => (prev === sign ? null : sign))}
+                style={interactiveMode ? { touchAction: 'none' } : undefined}
                 className={`flex items-center justify-center rounded-full select-none transition-all duration-200 ${
                   interactiveMode
                     ? `cursor-grab active:cursor-grabbing hover:scale-110 shadow-md ${
@@ -346,14 +362,30 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
 
                 {/* Interactive Status Indicator */}
                 {interactiveMode && (
-                  <div className="w-8 flex items-center justify-center">
+                  <div className="w-10 flex items-center justify-center">
                     {feedback === true && (
-                      <span className="text-emerald-500 text-3xl material-symbols-rounded animate-bounce">
-                        check_circle
-                      </span>
+                      <div className="relative w-9 h-9 animate-check-pop">
+                        {/* Animated ring fill */}
+                        <svg className="absolute inset-0 w-9 h-9" viewBox="0 0 36 36">
+                          <circle
+                            cx="18" cy="18" r="15"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            className="text-emerald-400 animate-ring-fill"
+                            strokeDasharray="100"
+                            strokeDashoffset="100"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        {/* Checkmark icon */}
+                        <span className="absolute inset-0 flex items-center justify-center text-emerald-500 text-3xl material-symbols-rounded">
+                          check_circle
+                        </span>
+                      </div>
                     )}
                     {feedback === false && (
-                      <span className="text-rose-500 text-3xl material-symbols-rounded">
+                      <span className="text-rose-500 text-3xl material-symbols-rounded animate-wrong-shake">
                         cancel
                       </span>
                     )}
@@ -401,7 +433,7 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
               : 'bg-rose-500 text-white border-2 border-white'
           }`}
         >
-          {pointerDrag.sign === '-' ? '−' : '+'}
+          <SignGlyph sign={pointerDrag.sign} className="w-7 h-7" />
         </div>
       )}
 
