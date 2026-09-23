@@ -43,6 +43,10 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
   const [placements, setPlacements] = useState<Record<number, (string | null)[]>>({});
   const [selectedSign, setSelectedSign] = useState<'+' | '-' | null>(null);
   const [dragOverSlot, setDragOverSlot] = useState<string | null>(null);
+  // Slot ("taskId:slotIndex") whose +/− chooser popup is open
+  const [openSlot, setOpenSlot] = useState<string | null>(null);
+  // Every time a row becomes fully filled with a new combination counts as one attempt
+  const [attempts, setAttempts] = useState(0);
 
   // Pointer drag state for touch / mobile support
   const [pointerDrag, setPointerDrag] = useState<{
@@ -62,33 +66,60 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
     });
     setPlacements(initial);
     setSelectedSign(null);
+    setOpenSlot(null);
+    setAttempts(0);
   }, [tasks]);
 
+  // Close the chooser popup on outside tap or Escape
+  useEffect(() => {
+    if (!openSlot) return;
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest(`[data-sign-slot="${openSlot}"]`)) setOpenSlot(null);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenSlot(null);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [openSlot]);
+
   const handlePlaceSign = (taskId: number, slotIndex: number, sign: string | null) => {
-    setPlacements(prev => {
-      const taskSlots = [...(prev[taskId] || new Array(tasks.find(t => t.id === taskId)?.numbers.length! - 1).fill(null))];
-      taskSlots[slotIndex] = sign;
-      return { ...prev, [taskId]: taskSlots };
-    });
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    // Solved rows are locked so they can't be used to probe other answers
+    if (getRowFeedback(task) === true) return;
+
+    const taskSlots = [...(placements[taskId] || new Array(task.numbers.length - 1).fill(null))];
+    if (taskSlots[slotIndex] === sign) return;
+    taskSlots[slotIndex] = sign;
+
+    if (taskSlots.every(s => s !== null)) setAttempts(a => a + 1);
+    setPlacements(prev => ({ ...prev, [taskId]: taskSlots }));
   };
 
   const handleCircleClick = (taskId: number, slotIndex: number) => {
     if (!interactiveMode) return;
-    const current = placements[taskId]?.[slotIndex] || null;
 
     if (selectedSign) {
       handlePlaceSign(taskId, slotIndex, selectedSign);
       return;
     }
 
-    // Cycle through: null -> '+' -> '-' -> null
-    if (current === null) {
-      handlePlaceSign(taskId, slotIndex, '+');
-    } else if (current === '+') {
-      handlePlaceSign(taskId, slotIndex, '-');
-    } else {
-      handlePlaceSign(taskId, slotIndex, null);
-    }
+    const task = tasks.find(t => t.id === taskId);
+    if (task && getRowFeedback(task) === true) return;
+
+    const slotKey = `${taskId}:${slotIndex}`;
+    setOpenSlot(prev => (prev === slotKey ? null : slotKey));
+  };
+
+  const handleChooseSign = (taskId: number, slotIndex: number, sign: '+' | '-' | null) => {
+    handlePlaceSign(taskId, slotIndex, sign);
+    setOpenSlot(null);
   };
 
   // HTML5 Drag and Drop handlers
@@ -268,6 +299,7 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
           return (
             <div
               key={task.id}
+              data-sign-row={task.id}
               className={`relative flex items-center justify-center rounded-xl px-1 py-2.5 transition-colors sm:py-3 ${
                 interactiveMode ? 'pr-10' : ''
               } ${
@@ -289,6 +321,8 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
                       const slotKey = `${task.id}:${idx}`;
                       const currentSign = userSigns[idx] || null;
                       const isOver = dragOverSlot === slotKey;
+                      const isOpen = openSlot === slotKey;
+                      const isLocked = feedback === true;
 
                       return (
                         <div
@@ -308,9 +342,9 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
                             }
                           }}
                           onDrop={e => handleDrop(e, task.id, idx)}
-                          className={`flex h-10 w-10 select-none items-center justify-center rounded-full transition-all duration-150 sm:h-14 sm:w-14 ${
+                          className={`relative flex h-10 w-10 select-none items-center justify-center rounded-full transition-all duration-150 sm:h-14 sm:w-14 ${
                             interactiveMode
-                              ? `cursor-pointer ${
+                              ? `${isLocked ? 'cursor-default' : 'cursor-pointer'} ${isOpen ? 'ring-4 ring-primary-400' : ''} ${
                                   isOver
                                     ? 'scale-110 bg-primary-500 text-white'
                                     : currentSign
@@ -330,6 +364,48 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
                               sign={currentSign}
                               className="pointer-events-none h-5 w-5 select-none sm:h-7 sm:w-7"
                             />
+                          )}
+
+                          {/* +/− chooser popup */}
+                          {interactiveMode && isOpen && (
+                            <div
+                              role="dialog"
+                              aria-label={t.signPuzzleChooseSign}
+                              onClick={e => e.stopPropagation()}
+                              className="absolute bottom-full left-1/2 z-30 mb-2 flex -translate-x-1/2 items-center gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl animate-fade-in dark:border-slate-700 dark:bg-slate-800"
+                            >
+                              {(['+', '-'] as const).map(sign => (
+                                <button
+                                  key={sign}
+                                  type="button"
+                                  data-choose-sign={sign}
+                                  aria-label={sign === '+' ? '+' : '−'}
+                                  onClick={() => handleChooseSign(task.id, idx, sign)}
+                                  className={`flex h-12 w-12 items-center justify-center rounded-full transition-transform active:scale-95 sm:h-14 sm:w-14 ${
+                                    isBlackAndWhite
+                                      ? 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white'
+                                      : sign === '+'
+                                      ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400'
+                                      : 'bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400'
+                                  } ${currentSign === sign ? 'ring-4 ring-primary-400' : ''}`}
+                                >
+                                  <SignGlyph sign={sign} className="h-1/2 w-1/2" />
+                                </button>
+                              ))}
+                              {currentSign && (
+                                <button
+                                  type="button"
+                                  aria-label={t.signPuzzleClearSign}
+                                  title={t.signPuzzleClearSign}
+                                  onClick={() => handleChooseSign(task.id, idx, null)}
+                                  className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition-transform hover:bg-slate-100 active:scale-95 dark:hover:bg-slate-700"
+                                >
+                                  <span className="material-symbols-rounded text-[20px]">close</span>
+                                </button>
+                              )}
+                              {/* Arrow */}
+                              <span className="absolute left-1/2 top-full h-3 w-3 -translate-x-1/2 -translate-y-1.5 rotate-45 border-b border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800" />
+                            </div>
                           )}
                         </div>
                       );
@@ -370,6 +446,12 @@ export const SignPuzzleSheet: React.FC<SignPuzzleSheetProps> = ({
         <div className="mt-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 p-4 text-center animate-fade-in">
           <p className="mb-2 font-display text-xl font-black text-emerald-700 dark:text-emerald-300">
             {t.puzzleAllCorrect}
+          </p>
+          <p data-testid="sign-puzzle-attempts" className="mb-3 font-display text-lg font-bold text-emerald-700/80 dark:text-emerald-300/80">
+            {t.signPuzzleAttempts
+              .replace('{attempts}', String(attempts))
+              .replace('{tasks}', String(tasks.length))}
+            {attempts <= tasks.length && <span className="block">{t.signPuzzleAttemptsPerfect}</span>}
           </p>
           <button
             onClick={onRandomize}
